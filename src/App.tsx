@@ -8,7 +8,6 @@ import {
   FileText,
   Lock,
   Mail,
-  Menu,
   Phone,
   Search,
   ShieldCheck,
