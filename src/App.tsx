@@ -122,7 +122,7 @@ const processSteps = [
   },
 ];
 
-const navItems = ["Home", "Services", "Upload Docs"];
+const navItems = ["Home", "Services", "Upload Docs", "Contact", "Why Choose Us"];
 
 export const demoTests = [
   {
@@ -283,6 +283,7 @@ function Header({
     "Services": "services",
     "Upload Docs": "upload",
     "Contact": "contact",
+    "Why Choose Us": "why",
   };
 
   return (
@@ -739,7 +740,7 @@ function WhyChooseSection() {
     "Modern CRM dashboard and document storage",
   ];
   return (
-    <section className="bg-white py-24">
+    <section id="why" className="bg-white py-24">
       <div className="mx-auto grid max-w-7xl gap-16 px-5 md:grid-cols-2 md:items-center">
         <div>
           <Pill>Why Choose Apex</Pill>
