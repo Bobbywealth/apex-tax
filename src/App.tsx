@@ -220,7 +220,7 @@ export default function App() {
     <div className="min-h-screen text-slate-900" style={{ backgroundColor: LIGHT_BG }}>
       <Header view={view} setView={setView} isLoggedIn={!!token} />
       {view === "website" ? (
-        <Website />
+        <Website onAdminClick={() => setView("dashboard")} />
       ) : !token ? (
         <AdminLogin onLogin={handleLogin} />
       ) : (
@@ -389,20 +389,20 @@ function Header({
   );
 }
 
-function Website() {
+function Website({ onAdminClick }: { onAdminClick: () => void }) {
   return (
     <main>
-      <HeroSection />
+      <HeroSection onAdminClick={onAdminClick} />
       <FeaturedImageSection />
       <ServicesSection />
       <TestimonialsSection />
       <WhyChooseSection />
       <ProcessIntakeSection />
-      <FinalCta />
+      <FinalCta onAdminClick={onAdminClick} />
     </main>
   );
 }
-function HeroSection() {
+function HeroSection({ onAdminClick }: { onAdminClick: () => void }) {
   return (
     <section id="home" className="relative overflow-hidden" style={{ backgroundColor: "#06162B" }}>
       <div
@@ -442,10 +442,11 @@ function HeroSection() {
               Expert tax filing for individuals and self-employed clients with a secure client portal, simple uploads, real-time updates, and personal support.
             </p>
 
-            <div className="mt-10 flex flex-wrap gap-4">
+            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
               <button
                 type="button"
-                className="group rounded-xl px-7 py-4 font-black text-slate-950 shadow-2xl transition hover:scale-105"
+                onClick={() => document.getElementById('upload')?.scrollIntoView({ behavior: 'smooth' })}
+                className="rounded-xl px-7 py-4 text-center font-black text-slate-950 shadow-2xl transition hover:scale-105"
                 style={{ backgroundColor: GOLD }}
               >
                 Start My Tax Filing
@@ -453,8 +454,8 @@ function HeroSection() {
 
               <button
                 type="button"
-                onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); (document.querySelector("#admin") as HTMLElement)?.scrollIntoView({ behavior: "smooth" }); }}
-                className="group rounded-xl border border-[#D5AA44]/70 bg-transparent px-7 py-4 font-black text-white transition hover:bg-white/10"
+                onClick={onAdminClick}
+                className="rounded-xl border border-[#D5AA44]/70 bg-transparent px-7 py-4 text-center font-black text-white transition hover:bg-white/10"
               >
                 Admin Login
               </button>
@@ -913,7 +914,7 @@ function ProcessIntakeSection() {
   );
 }
 
-function FinalCta() {
+function FinalCta({ onAdminClick }: { onAdminClick: () => void }) {
   return (
     <section id="contact" className="py-24">
       <div className="mx-auto max-w-7xl px-5">
@@ -926,19 +927,21 @@ function FinalCta() {
             Work with Apex Tax Business Group for a clean, secure, and professional tax filing experience.
           </p>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
-            <a
-              href="/contact"
-              className="rounded-2xl px-8 py-4 text-center font-black text-white shadow-lg transition hover:opacity-90"
+            <button
+              type="button"
+              onClick={() => document.getElementById('upload')?.scrollIntoView({ behavior: 'smooth' })}
+              className="rounded-2xl px-8 py-4 text-center font-black text-slate-950 shadow-lg transition hover:opacity-90"
               style={{ backgroundColor: GOLD }}
             >
               Start Filing
-            </a>
-            <a
-              href="#admin-login"
+            </button>
+            <button
+              type="button"
+              onClick={onAdminClick}
               className="rounded-2xl border border-white px-8 py-4 text-center font-black text-white transition hover:bg-white/10"
             >
               Admin Login
-            </a>
+            </button>
           </div>
         </div>
       </div>

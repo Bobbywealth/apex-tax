@@ -3,9 +3,11 @@
 @tailwind utilities;
 
 html,
-body {
+body,
+#root {
   overflow-x: hidden;
   margin: 0;
   padding: 0;
   width: 100%;
+  max-width: 100vw;
 }
