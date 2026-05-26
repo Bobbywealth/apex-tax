@@ -1121,6 +1121,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [docError, setDocError] = useState("");
   const [appointments, setAppointments] = useState<any[]>([]);
   const [appointmentsLoading, setAppointmentsLoading] = useState(false);
+  const [clients, setClients] = useState<any[]>([]);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -1209,6 +1210,9 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     if (activeTab === "appointments") {
       setAppointmentsLoading(true);
       api.appointments.list().then(data => { setAppointments(data || []); setAppointmentsLoading(false); }).catch(() => { setAppointments([]); setAppointmentsLoading(false); });
+    }
+    if (activeTab === "clients") {
+      api.clients.list().then(data => setClients(data || [])).catch(() => setClients([]));
     }
   }, [activeTab]);
 
@@ -1378,13 +1382,46 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
 
         {activeTab === "clients" && (
           <>
-            <div className="mb-6">
-              <h2 className="text-3xl font-black" style={{ color: NAVY }}>Clients</h2>
-              <p className="text-slate-500">Clients converted from intake will appear here</p>
+            <div className="mb-6 flex items-center justify-between gap-3">
+              <div>
+                <h2 className="text-3xl font-black" style={{ color: NAVY }}>Clients</h2>
+                <p className="text-slate-500">{clients.length} client{clients.length !== 1 ? "s" : ""}</p>
+              </div>
             </div>
-            <div className="rounded-3xl bg-white p-5 shadow-sm">
-              <p className="py-12 text-center text-slate-400">Clients converted from intake will appear here.</p>
-            </div>
+            {clients.length === 0 ? (
+              <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-12 text-center shadow-sm">
+                <Users size={36} style={{ color: GOLD }} className="mx-auto mb-3 opacity-40" />
+                <h3 className="text-base font-bold" style={{ color: NAVY }}>No clients yet</h3>
+                <p className="mt-1 text-sm text-slate-400">Convert intake submissions to clients to see them here.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {clients.map(c => (
+                  <div key={c.id} className="rounded-2xl bg-white p-5 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full font-black text-white" style={{ backgroundColor: NAVY }}>{c.full_name?.charAt(0) || "?"}</div>
+                          <div>
+                            <span className="font-bold" style={{ color: NAVY }}>{c.full_name}</span>
+                            <div className="flex gap-3 text-xs text-slate-400">
+                              <span>{c.email}</span>
+                              {c.phone && <span>{c.phone}</span>}
+                            </div>
+                          </div>
+                        </div>
+                        {c.tax_type && (
+                          <div className="ml-12 mt-1">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600"><FileText size={10} />{c.tax_type}</span>
+                          </div>
+                        )}
+                      </div>
+                      <span className="shrink-0 text-xs text-slate-400">{new Date(c.created_at).toLocaleDateString()}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </>
         )}
 
