@@ -122,7 +122,7 @@ const processSteps = [
   },
 ];
 
-const navItems = ["Home", "Services", "Upload Docs", "Contact", "Why Choose Us"];
+const navItems = ["Home", "Services", "Upload", "Contact", "Why Choose Us"];
 
 export const demoTests = [
   {
@@ -202,7 +202,7 @@ function PortalClientCard({ name, subtitle, status }: { name: string; subtitle: 
 
 export default function App() {
   // Initialize view from hash OR sessionStorage (sessionStorage survives page refresh within the same tab)
-  const [view, setView] = useState<"website" | "dashboard">(() => {
+  const [view, setView] = useState<"website" | "dashboard" | "upload">(() => {
     const hash = window.location.hash.replace("#", "");
     if (hash === "dashboard" || hash === "admin" || hash.startsWith("admin-")) return "dashboard";
     // Check sessionStorage for admin session
@@ -219,6 +219,8 @@ export default function App() {
       const hash = window.location.hash.replace("#", "");
       if (hash === "dashboard" || hash === "admin" || hash.startsWith("admin-")) {
         setView("dashboard");
+      } else if (hash === "upload") {
+        setView("upload");
       } else {
         setView("website");
         setTimeout(() => {
@@ -259,6 +261,8 @@ export default function App() {
       <Header view={view} setView={setView} isLoggedIn={!!token} goToDashboard={goToDashboard} />
       {view === "website" ? (
         <Website onAdminClick={goToDashboard} setView={setView} />
+      ) : view === "upload" ? (
+        <UploadPage />
       ) : !token ? (
         <AdminLogin onLogin={handleLogin} />
       ) : (
@@ -271,8 +275,8 @@ export default function App() {
 function Header({
   view, setView, isLoggedIn, goToDashboard,
 }: {
-  view: "website" | "dashboard";
-  setView: (v: "website" | "dashboard") => void;
+  view: "website" | "dashboard" | "upload";
+  setView: (v: "website" | "dashboard" | "upload") => void;
   isLoggedIn: boolean;
   goToDashboard: () => void;
 }) {
@@ -281,7 +285,7 @@ function Header({
   const idMap: Record<string, string> = {
     "Home": "home",
     "Services": "services",
-    "Upload Docs": "upload",
+    "Upload": "upload",
     "Contact": "contact",
     "Why Choose Us": "why",
   };
@@ -410,7 +414,6 @@ function Website({ onAdminClick, setView }: { onAdminClick: () => void; setView:
       <ServicesSection />
       <TestimonialsSection />
       <WhyChooseSection />
-      <ProcessIntakeSection />
       <FinalCta onAdminClick={onAdminClick} />
       <Footer setView={setView} />
     </main>
@@ -1610,6 +1613,203 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           </>
         )}
       </main>
+    </div>
+  );
+}
+
+function UploadPage() {
+  const [form, setForm] = useState({
+    full_name: '', email: '', phone: '', tax_type: '', message: '', preferred_date: '', preferred_time: '',
+  });
+  const [files, setFiles] = useState<File[]>([]);
+  const [uploading, setUploading] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [submittedIntakeId, setSubmittedIntakeId] = useState('');
+  const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
+  const [error, setError] = useState('');
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) setFiles(Array.from(e.target.files));
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(files.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.full_name || !form.email) return;
+    setUploading(true);
+    setError('');
+    try {
+      // 1. Submit intake
+      const res = await fetch(`${API_BASE}/api/intake`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to submit');
+      const intakeId = data.id;
+      setSubmittedIntakeId(intakeId);
+
+      // 2. Upload each file
+      const uploaded: string[] = [];
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append('intake_id', intakeId);
+        formData.append('file', file);
+        const uploadRes = await fetch(`${API_BASE}/api/upload/public`, { method: 'POST', body: formData });
+        const uploadData = await uploadRes.json();
+        if (uploadRes.ok) uploaded.push(uploadData.filename || file.name);
+      }
+      setUploadedFiles(uploaded);
+      setSubmitted(true);
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-4" style={{ backgroundColor: LIGHT_BG }}>
+        <div className="w-full max-w-xl rounded-3xl bg-white p-8 shadow-2xl text-center">
+          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full mx-auto" style={{ backgroundColor: PALE_GOLD }}>
+            <CheckCircle2 size={40} style={{ color: GOLD }} />
+          </div>
+          <h2 className="text-3xl font-black" style={{ color: NAVY }}>Request Submitted!</h2>
+          <p className="mt-3 text-slate-500">We received your info{uploadedFiles.length > 0 ? ` and ${uploadedFiles.length} document(s)` : ''}. We'll contact you within 24 hours.</p>
+          {uploadedFiles.length > 0 && (
+            <div className="mt-4 text-left rounded-xl bg-slate-50 p-4">
+              <p className="text-xs font-bold uppercase text-slate-400 mb-2">Uploaded Documents</p>
+              {uploadedFiles.map((f, i) => (
+                <div key={i} className="flex items-center gap-2 text-sm text-slate-600">
+                  <FileText size={14} style={{ color: GOLD }} />{f}
+                </div>
+              ))}
+            </div>
+          )}
+          <button
+            onClick={() => { setSubmitted(false); setForm({ full_name: '', email: '', phone: '', tax_type: '', message: '', preferred_date: '', preferred_time: '' }); setFiles([]); setUploadedFiles([]); }}
+            className="mt-8 rounded-2xl px-8 py-4 font-black text-white shadow-xl" style={{ backgroundColor: NAVY }}
+          >
+            Submit Another
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen py-16 px-4" style={{ backgroundColor: LIGHT_BG }}>
+      <div className="mx-auto max-w-3xl">
+        {/* Header */}
+        <div className="mb-10 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm mb-4">
+            <Lock size={14} style={{ color: GOLD }} />Secure Document Upload
+          </div>
+          <h1 className="text-4xl font-black" style={{ color: NAVY }}>Upload Your Documents</h1>
+          <p className="mt-3 text-slate-500">Fill out your info and attach W-2s, 1099s, receipts, or IDs. We'll review and get back to you within 24 hours.</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6 rounded-3xl bg-white p-8 shadow-xl">
+          {/* Personal Info */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Full Name *</label>
+              <input type="text" required placeholder="John Smith" value={form.full_name} onChange={e => setForm({ ...form, full_name: e.target.value })}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-800 placeholder-slate-400 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Email *</label>
+              <input type="email" required placeholder="john@example.com" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-800 placeholder-slate-400 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Phone</label>
+              <input type="tel" placeholder="(555) 123-4567" value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-800 placeholder-slate-400 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Tax Service Needed</label>
+              <select value={form.tax_type} onChange={e => setForm({ ...form, tax_type: e.target.value })}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-600 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100">
+                <option value="">Select...</option>
+                <option value="personal">Personal Tax Filing (W-2)</option>
+                <option value="self-employed">Self-Employed / 1099</option>
+                <option value="both">Both Personal + Self-Employed</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Appointment preferences */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Preferred Date</label>
+              <input type="date" value={form.preferred_date} onChange={e => setForm({ ...form, preferred_date: e.target.value })} min={new Date().toISOString().split('T')[0]}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3.5 text-sm text-slate-700 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Preferred Time</label>
+              <select value={form.preferred_time} onChange={e => setForm({ ...form, preferred_time: e.target.value })}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-600 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100">
+                <option value="">Select time</option>
+                {['9:00 AM','10:00 AM','11:00 AM','12:00 PM','1:00 PM','2:00 PM','3:00 PM','4:00 PM','5:00 PM'].map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Message */}
+          <div>
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Anything Else?</label>
+            <textarea rows={3} placeholder="Anything we should know?" value={form.message} onChange={e => setForm({ ...form, message: e.target.value })}
+              className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3.5 text-slate-800 placeholder-slate-400 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100" />
+          </div>
+
+          {/* File Upload */}
+          <div>
+            <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">Upload Documents</label>
+            <div className={`relative rounded-xl border-2 border-dashed p-6 text-center transition-colors ${files.length > 0 ? 'border-amber-400 bg-amber-50' : 'border-slate-200 hover:border-amber-400 hover:bg-slate-50'}`}>
+              {files.length > 0 ? (
+                <div className="space-y-2">
+                  {files.map((f, i) => (
+                    <div key={i} className="flex items-center justify-between rounded-lg bg-white px-3 py-2 text-sm shadow-sm">
+                      <div className="flex items-center gap-2">
+                        <FileText size={16} style={{ color: GOLD }} />
+                        <span className="font-medium text-slate-700">{f.name}</span>
+                        <span className="text-xs text-slate-400">({(f.size / 1024 / 1024).toFixed(1)} MB)</span>
+                      </div>
+                      <button type="button" onClick={() => removeFile(i)} className="text-slate-400 hover:text-red-500"><XCircle size={16} /></button>
+                    </div>
+                  ))}
+                  <label className="mt-2 inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-amber-600 hover:text-amber-700">
+                    <Upload size={12} />Add more files
+                    <input type="file" multiple className="hidden" onChange={handleFileChange} accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+                  </label>
+                </div>
+              ) : (
+                <label className="cursor-pointer">
+                  <Upload size={28} className="mx-auto mb-2 text-slate-400" />
+                  <p className="text-sm text-slate-500 font-medium">Click to select files</p>
+                  <p className="mt-1 text-xs text-slate-400">W-2s, 1099s, receipts, IDs — PDF, JPG, PNG, DOC</p>
+                  <input type="file" multiple className="hidden" onChange={handleFileChange} accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+                </label>
+              )}
+            </div>
+          </div>
+
+          {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-600 flex items-center gap-2"><XCircle size={16} />{error}</div>}
+
+          <button type="submit" disabled={uploading || !form.full_name || !form.email}
+            className="w-full rounded-2xl py-4 text-lg font-black text-white shadow-xl transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ backgroundColor: GOLD }}>
+            {uploading ? 'Submitting...' : 'Submit Request'}
+          </button>
+          <p className="text-center text-xs text-slate-400 flex items-center justify-center gap-1"><Lock size={10} />Your information is encrypted and never shared.</p>
+        </form>
+      </div>
     </div>
   );
 }
