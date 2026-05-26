@@ -1005,9 +1005,16 @@ function AdminLogin({ onLogin }: { onLogin: (token: string) => void }) {
     <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-4 py-16" style={{ backgroundColor: LIGHT_BG }}>
       <div className="w-full max-w-md rounded-3xl p-8 shadow-xl" style={{ backgroundColor: "white" }}>
         <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl p-2 shadow-lg ring-1 ring-slate-200" style={{ backgroundColor: NAVY }}>
-            <img src={LOGO_URL} alt="Apex Tax" className="h-full w-full object-contain brightness-0 invert" />
-          </div>
+          {/* Logo with brand name — matches header style */}
+          <a href="#home" className="mb-5 flex flex-col items-center gap-2">
+            <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white p-2 shadow-lg ring-1 ring-slate-200">
+              <img src={LOGO_URL} alt="Apex Tax" className="h-full w-full object-contain" />
+            </div>
+            <div>
+              <div className="text-xl font-black tracking-tight leading-none" style={{ color: NAVY }}>APEX TAX</div>
+              <div className="text-[10px] font-semibold tracking-[0.2em]" style={{ color: GOLD }}>BUSINESS GROUP</div>
+            </div>
+          </a>
           <h1 className="text-2xl font-black" style={{ color: NAVY }}>Admin Portal</h1>
           <p className="mt-1 text-sm text-slate-500">Sign in to manage clients and intake</p>
         </div>
