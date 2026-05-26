@@ -23,7 +23,6 @@ async function request(method: string, path: string, body?: unknown) {
   const opts: RequestInit = {
     method,
     headers,
-    credentials: 'include',
   };
   if (body) opts.body = JSON.stringify(body);
 
