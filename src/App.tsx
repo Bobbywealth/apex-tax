@@ -374,7 +374,7 @@ function Header({
               onClick={() => setView("dashboard")}
               className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-200"
             >
-              Dashboard
+              Login
             </button>
           )}
         </div>
