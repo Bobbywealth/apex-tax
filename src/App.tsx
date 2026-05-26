@@ -735,16 +735,19 @@ function FinalCta() {
             Work with Apex Tax Business Group for a clean, secure, and professional tax filing experience.
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-4">
-            <button
-              type="button"
-              className="rounded-2xl px-8 py-4 font-black text-white shadow-lg"
+            <a
+              href="/contact"
+              className="rounded-2xl px-8 py-4 font-black text-white shadow-lg transition hover:opacity-90"
               style={{ backgroundColor: GOLD }}
             >
               Schedule Consultation
-            </button>
-            <button type="button" className="rounded-2xl border border-white px-8 py-4 font-black text-white">
+            </a>
+            <a
+              href="/contact"
+              className="rounded-2xl border border-white px-8 py-4 font-black text-white transition hover:bg-white/10"
+            >
               Contact Us
-            </button>
+            </a>
           </div>
         </div>
       </div>
