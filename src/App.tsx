@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { api } from "./services/api";
+import { api, API_BASE } from "./services/api";
 import { motion } from "framer-motion";
 import {
   BarChart3,
@@ -258,7 +258,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen text-slate-900" style={{ backgroundColor: LIGHT_BG }}>
-      <Header view={view} setView={setView} isLoggedIn={!!token} goToDashboard={goToDashboard} />
+      <Header view={view} isLoggedIn={!!token} goToDashboard={goToDashboard} />
       {view === "website" ? (
         <Website onAdminClick={goToDashboard} setView={setView} />
       ) : view === "upload" ? (
@@ -273,10 +273,9 @@ export default function App() {
 }
 
 function Header({
-  view, setView, isLoggedIn, goToDashboard,
+  view, isLoggedIn, goToDashboard,
 }: {
   view: "website" | "dashboard" | "upload";
-  setView: (v: "website" | "dashboard" | "upload") => void;
   isLoggedIn: boolean;
   goToDashboard: () => void;
 }) {
@@ -778,171 +777,6 @@ function WhyChooseSection() {
     </section>
   );
 }
-function ProcessIntakeSection() {
-  const [form, setForm] = useState({ full_name: '', email: '', phone: '', tax_type: '', message: '', preferred_date: '', preferred_time: '' });
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.full_name || !form.email) return;
-    setLoading(true);
-    setError('');
-    try {
-      await api.intake.submit(form);
-      setSuccess(true);
-    } catch (err: any) {
-      setError(err.message || 'Submission failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <section id="upload" className="relative overflow-hidden py-28">
-      <div
-        className="absolute left-0 top-0 h-full w-full opacity-5"
-        style={{
-          background: `radial-gradient(circle at top left, ${NAVY}, transparent 35%), radial-gradient(circle at bottom right, ${GOLD}, transparent 35%)`,
-        }}
-      />
-      <div className="relative mx-auto grid max-w-7xl gap-16 px-5 lg:grid-cols-2 lg:items-center">
-        <div>
-          <Pill>Simple Process</Pill>
-          <h2 className="mt-4 text-3xl font-black leading-tight sm:mt-6 sm:text-4xl lg:text-5xl md:text-6xl" style={{ color: NAVY }}>
-            Filing Taxes Shouldn't Feel Complicated.
-          </h2>
-          <div className="mt-8 space-y-6 sm:mt-12 lg:space-y-8">
-            {processSteps.map((step) => (
-              <div key={step.number} className="flex gap-4 sm:gap-6">
-                <div
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-xl font-black text-white shadow-xl sm:h-16 sm:w-16 sm:text-2xl"
-                  style={{ backgroundColor: NAVY }}
-                >
-                  {step.number}
-                </div>
-                <div>
-                  <div className="text-lg font-black sm:text-2xl" style={{ color: NAVY }}>
-                    {step.title}
-                  </div>
-                  <p className="mt-1 text-sm leading-6 text-slate-600 sm:mt-2 sm:text-base lg:text-lg lg:leading-8">{step.text}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="rounded-[2.5rem] p-6 shadow-2xl sm:p-8 lg:p-10" style={{ backgroundColor: NAVY }}>
-          <div className="rounded-[2rem] bg-white p-6 sm:p-8">
-            <div className="mb-6 flex items-start justify-between gap-3 sm:mb-8">
-              <div>
-                <div className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 sm:text-sm">
-                  Start Your Filing
-                </div>
-                <h3 className="mt-1 text-2xl font-black sm:mt-2 sm:text-3xl lg:text-4xl" style={{ color: NAVY }}>
-                  Client Intake Portal
-                </h3>
-              </div>
-              <Upload size={26} style={{ color: GOLD }} className="sm:w-8 sm:h-8" />
-            </div>
-            {success ? (
-              <div className="flex flex-col items-center py-8 text-center">
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: PALE_GOLD }}>
-                  <CheckCircle2 size={32} style={{ color: GOLD }} />
-                </div>
-                <h4 className="text-2xl font-black" style={{ color: NAVY }}>Request Submitted!</h4>
-                <p className="mt-2 text-slate-500">{form.preferred_date ? `Appointment requested for ${form.preferred_date}${form.preferred_time ? ` at ${form.preferred_time}` : ""}. We'll confirm shortly.` : "We'll contact you within 24 hours to get started."}</p>
-                <button
-                  type="button"
-                  className="mt-6 rounded-2xl px-6 py-3 font-bold text-white"
-                  style={{ backgroundColor: NAVY }}
-                  onClick={() => { setSuccess(false); setForm({ full_name: '', email: '', phone: '', tax_type: '', message: '', preferred_date: '', preferred_time: '' }); }}
-                >
-                  Submit Another
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="grid gap-4">
-                <input
-                  type="text"
-                  required
-                  placeholder="Full Name *"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-4 text-slate-800 placeholder-slate-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
-                  value={form.full_name}
-                  onChange={(e) => setForm({ ...form, full_name: e.target.value })}
-                />
-                <input
-                  type="email"
-                  required
-                  placeholder="Email Address *"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-4 text-slate-800 placeholder-slate-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                />
-                <input
-                  type="tel"
-                  placeholder="Phone Number"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-4 text-slate-800 placeholder-slate-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
-                  value={form.phone}
-                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                />
-                <select
-                  className="w-full rounded-xl border border-slate-200 px-4 py-4 text-slate-500 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
-                  value={form.tax_type}
-                  onChange={(e) => setForm({ ...form, tax_type: e.target.value })}
-                >
-                  <option value="">Tax Service Needed</option>
-                  <option value="personal">Personal Tax Filing (W-2)</option>
-                  <option value="self-employed">Self-Employed / 1099</option>
-                  <option value="both">Both Personal + Self-Employed</option>
-                </select>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="mb-1 block text-xs font-semibold text-slate-500">Preferred Date</label>
-                    <input type="date" className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm text-slate-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100" value={form.preferred_date} onChange={e => setForm({ ...form, preferred_date: e.target.value })} min={new Date().toISOString().split('T')[0]} />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-xs font-semibold text-slate-500">Preferred Time</label>
-                    <select className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm text-slate-600 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100" value={form.preferred_time} onChange={e => setForm({ ...form, preferred_time: e.target.value })}>
-                      <option value="">Select time</option>
-                      <option value="9:00 AM">9:00 AM</option>
-                      <option value="10:00 AM">10:00 AM</option>
-                      <option value="11:00 AM">11:00 AM</option>
-                      <option value="12:00 PM">12:00 PM</option>
-                      <option value="1:00 PM">1:00 PM</option>
-                      <option value="2:00 PM">2:00 PM</option>
-                      <option value="3:00 PM">3:00 PM</option>
-                      <option value="4:00 PM">4:00 PM</option>
-                      <option value="5:00 PM">5:00 PM</option>
-                    </select>
-                  </div>
-                </div>
-                <textarea
-                  placeholder="Anything else we should know?"
-                  rows={3}
-                  className="w-full resize-none rounded-xl border border-slate-200 px-4 py-4 text-slate-800 placeholder-slate-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
-                  value={form.message}
-                  onChange={(e) => setForm({ ...form, message: e.target.value })}
-                />
-                {error && <p className="text-sm text-red-500">{error}</p>}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="mt-2 rounded-2xl py-4 text-lg font-black text-white shadow-xl transition hover:opacity-90 disabled:opacity-60"
-                  style={{ backgroundColor: GOLD }}
-                >
-                  {loading ? 'Submitting...' : 'Submit Secure Request'}
-                </button>
-                <p className="text-center text-xs text-slate-400">Your info is encrypted and never shared.</p>
-              </form>
-            )}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 // ─── Footer ─────────────────────────────────────────────────────────────
 function Footer({ setView }: { setView: (v: "website" | "dashboard") => void }) {
   return (
@@ -1615,7 +1449,7 @@ function UploadPage() {
   const [files, setFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [submittedIntakeId, setSubmittedIntakeId] = useState('');
+
   const [uploadedFiles, setUploadedFiles] = useState<string[]>([]);
   const [error, setError] = useState('');
 
@@ -1642,7 +1476,7 @@ function UploadPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to submit');
       const intakeId = data.id;
-      setSubmittedIntakeId(intakeId);
+
 
       // 2. Upload each file
       const uploaded: string[] = [];

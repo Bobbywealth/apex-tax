@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 
-const API_BASE = import.meta.env.VITE_API_URL || 'https://apex-tax-api.onrender.com';
+export const API_BASE = import.meta.env.VITE_API_URL || 'https://apex-tax-api.onrender.com';
 const TOKEN_KEY = 'apex-tax-admin-token';
 
 function getToken(): string | null {
