@@ -1,16 +1,39 @@
 /// <reference types="vite/client" />
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://apex-tax-api.onrender.com';
+const TOKEN_KEY = 'apex-tax-admin-token';
+
+function getToken(): string | null {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+function setToken(token: string): void {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+function clearToken(): void {
+  localStorage.removeItem(TOKEN_KEY);
+}
 
 async function request(method: string, path: string, body?: unknown) {
+  const token = getToken();
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+
   const opts: RequestInit = {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     credentials: 'include',
   };
   if (body) opts.body = JSON.stringify(body);
+
   const res = await fetch(`${API_BASE}${path}`, opts);
   if (!res.ok) {
+    // 401 → clear token and reload
+    if (res.status === 401) {
+      clearToken();
+      window.location.reload();
+    }
     const err = await res.json().catch(() => ({ error: res.statusText }));
     throw new Error(err.error || `Request failed: ${res.status}`);
   }
@@ -20,8 +43,15 @@ async function request(method: string, path: string, body?: unknown) {
 // Auth
 export const api = {
   auth: {
-    login: (username: string, password: string) => request('POST', '/api/auth/login', { username, password }),
-    logout: () => request('POST', '/api/auth/logout', {}),
+    login: async (username: string, password: string) => {
+      const data = await request('POST', '/api/auth/login', { username, password }) as { token?: string };
+      if (data?.token) setToken(data.token);
+      return data;
+    },
+    logout: async () => {
+      clearToken();
+      await request('POST', '/api/auth/logout', {});
+    },
     me: () => request('GET', '/api/auth/me'),
   },
   clients: {

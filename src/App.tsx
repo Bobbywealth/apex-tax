@@ -958,7 +958,7 @@ function AdminLogin({ onLogin }: { onLogin: (token: string) => void }) {
     setLoading(true);
     try {
       const res = await api.auth.login(username, password);
-      const token = res.token || res.accessToken || res.data?.token || "";
+      const token = res.token;
       if (!token) throw new Error("No token received");
       onLogin(token);
     } catch (err: any) {
