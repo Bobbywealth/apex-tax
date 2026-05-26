@@ -786,7 +786,7 @@ function Footer({ setView }: { setView: (v: "website" | "dashboard") => void }) 
           {/* Logo + tagline */}
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow ring-1 ring-slate-200">
-              <img src={LOGO_URL} alt="Apex Tax" className="h-full w-full object-contain brightness-0" style={{ filter: "brightness(0) opacity(0.7)" }} />
+              <img src={LOGO_URL} alt="Apex Tax" className="h-full w-full object-contain" />
             </div>
             <div>
               <div className="text-sm font-black" style={{ color: NAVY }}>APEX TAX</div>
