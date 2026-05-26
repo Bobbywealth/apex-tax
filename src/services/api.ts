@@ -61,7 +61,7 @@ export const api = {
     delete: (id: string) => request('DELETE', `/api/clients/${id}`),
   },
   intake: {
-    submit: (data: { full_name: string; email: string; phone?: string; tax_type?: string; message?: string }) =>
+    submit: (data: { full_name: string; email: string; phone?: string; tax_type?: string; message?: string; preferred_date?: string; preferred_time?: string }) =>
       request('POST', '/api/intake', data),
     list: (params?: { page?: number; limit?: number; status?: string }) => {
       const qs = new URLSearchParams();
@@ -74,6 +74,12 @@ export const api = {
     updateStatus: (id: string, status: string) => request('PATCH', `/api/intake/${id}`, { status }),
     convert: (id: string) => request('POST', `/api/intake/${id}/convert`) as Promise<{ ok: boolean; clientId: string; message: string }>,
   },
+  appointments: {
+    list: () => request('GET', '/api/appointments'),
+    create: (data: { client_name: string; email: string; phone: string; date: string; time: string; notes?: string }) =>
+      request('POST', '/api/appointments', data),
+    updateStatus: (id: string, status: string) => request('PATCH', `/api/appointments/${id}`, { status }),
+  },
   admin: {
     stats: () => request('GET', '/api/admin/stats'),
     activity: (params?: { page?: number; limit?: number }) => {
@@ -82,6 +88,26 @@ export const api = {
       if (params?.limit) qs.set('limit', String(params.limit));
       const query = qs.toString() ? `?${qs.toString()}` : '';
       return request('GET', `/api/admin/activity${query}`) as Promise<{ logs: any[]; total: number; page: number; pages: number }>;
+    },
+  },
+  documents: {
+    list: (clientId?: string) =>
+      request('GET', clientId ? `/api/documents?client_id=${clientId}` : '/api/documents'),
+    upload: async (clientId: string, file: File) => {
+      const token = getToken();
+      const formData = new FormData();
+      formData.append('client_id', clientId);
+      formData.append('file', file);
+      const res = await fetch(`${API_BASE}/api/documents/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: res.statusText }));
+        throw new Error(err.error || `Upload failed: ${res.status}`);
+      }
+      return res.json();
     },
   },
 };
