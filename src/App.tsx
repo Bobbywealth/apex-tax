@@ -1233,40 +1233,49 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   };
 
   return (
-    <div className="mx-auto grid max-w-7xl gap-6 px-5 py-8 md:grid-cols-[250px_1fr]">
-      <aside className="rounded-3xl p-5 text-white shadow-xl" style={{ backgroundColor: NAVY }}>
-        <div className="mb-6 flex items-center gap-3 text-lg font-black">
+    <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 md:grid-cols-[260px_1fr] md:px-5 md:py-8">
+      {/* Sidebar: icon tab bar at bottom on mobile, side nav on desktop */}
+      <aside className="order-2 md:order-1 rounded-2xl md:rounded-3xl p-3 md:p-5 text-white shadow-xl fixed bottom-0 left-0 right-0 z-30 md:static md:shadow-none" style={{ backgroundColor: NAVY }}>
+        {/* Desktop logo + label */}
+        <div className="hidden md:flex mb-6 items-center gap-3 text-lg font-black">
           <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white p-1">
             <img src={LOGO_URL} alt="Apex Tax" className="h-full w-full object-contain" />
           </div>
           <span>Admin Portal</span>
         </div>
-        {[
-          { icon: BarChart3, label: "Dashboard", key: "dashboard" as const },
-          { icon: Users, label: "Clients", key: "clients" as const },
-          { icon: Upload, label: "Documents", key: "documents" as const },
-          { icon: Calendar, label: "Appointments", key: "appointments" as const },
-          { icon: Mail, label: "Messages", key: "messages" as const },
-        ].map((item) => {
-          const Icon = item.icon;
-          return (
-            <button
-              onClick={() => setActiveTab(item.key)}
-              className={`mb-1.5 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${activeTab === item.key ? "bg-white/20" : "hover:bg-white/10"}`}
-              key={item.key}
-            >
-              <Icon size={18} /><span>{item.label}</span>
-            </button>
-          );
-        })}
-        <div className="mt-6 border-t border-white/20 pt-4">
+        {/* Nav: horizontal icon tabs on mobile, vertical on desktop */}
+        <div className="flex flex-row md:flex-col gap-1 md:gap-1.5">
+          {[
+            { icon: BarChart3, key: "dashboard" as const },
+            { icon: Users, key: "clients" as const },
+            { icon: Upload, key: "documents" as const },
+            { icon: Calendar, key: "appointments" as const },
+            { icon: Mail, key: "messages" as const },
+          ].map((item) => {
+            const Icon = item.icon;
+            return (
+              <button
+                onClick={() => setActiveTab(item.key)}
+                className={`flex-1 md:flex-none flex items-center justify-center md:justify-start gap-2.5 rounded-xl px-2 py-3 md:px-3 md:py-3 text-xs md:text-sm font-semibold transition min-w-[52px] ${activeTab === item.key ? "bg-white/20" : "hover:bg-white/10"}`}
+                key={item.key}
+              >
+                <Icon size={20} className="shrink-0" /><span className="hidden md:inline">{item.key.charAt(0).toUpperCase() + item.key.slice(1)}</span>
+              </button>
+            );
+          })}
+        </div>
+        {/* Sign out: icon-only on mobile, full on desktop */}
+        <div className="mt-3 md:mt-6 border-t border-white/20 pt-3 md:pt-4 hidden md:block">
           <button onClick={onLogout} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-300 hover:bg-red-500/20">
             <LogOut size={18} />Sign Out
           </button>
         </div>
+        <button onClick={onLogout} className="flex md:hidden items-center justify-center p-2 text-red-300 hover:bg-red-500/20 rounded-xl min-w-[52px] mt-1">
+          <LogOut size={20} />
+        </button>
       </aside>
 
-      <main>
+      <main className="order-1 md:order-2 pb-24 md:pb-0">
         {activeTab === "dashboard" && (
           <>
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
@@ -1295,7 +1304,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             )}
 
             {data && (
-              <div className="grid gap-4 md:grid-cols-4">
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
                 <Stat icon={Users} label="Total Clients" value={data.totalClients ?? 0} />
                 <Stat icon={FileText} label="In Progress" value={data.inProgress ?? 0} />
                 <Stat icon={CheckCircle2} label="Filed" value={data.filed ?? 0} />
@@ -1434,7 +1443,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
             <div className="mb-4 grid gap-4 lg:grid-cols-2">
               <div className="rounded-2xl bg-white p-4 shadow-sm">
                 <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">Upload To Client</label>
-                <select className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100" value={docClientId} onChange={e => setDocClientId(e.target.value)}>
+                <select className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm text-slate-700 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100" value={docClientId} onChange={e => setDocClientId(e.target.value)}>
                   <option value="">Select a client…</option>
                   {submissions.map(s => <option key={s.id} value={s.id}>{s.full_name} — {s.email}</option>)}
                 </select>
@@ -1447,7 +1456,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                   ) : docFile ? (
                     <div className="flex items-center gap-2"><FileText size={20} style={{ color: GOLD }} /><span className="text-sm font-semibold text-slate-700">{docFile.name}</span><button onClick={() => setDocFile(null)} className="ml-2 text-slate-400 hover:text-red-500"><XCircle size={16} /></button></div>
                   ) : (
-                    <><Upload size={20} className="mb-2 text-slate-400" /><span className="text-xs text-slate-500">Click to select file</span><input type="file" className="absolute inset-0 cursor-pointer opacity-0" style={{ zIndex: 1 }} onChange={e => { const f = e.target.files?.[0]; if (f) setDocFile(f); }} accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" /></>
+                    <><Upload size={20} className="mb-2 text-slate-400" /><span className="text-xs text-slate-500">Click to select file</span><input type="file" className="absolute inset-0 cursor-pointer opacity-0" style={{ zIndex: 10 }} onChange={e => { const f = e.target.files?.[0]; if (f) setDocFile(f); }} accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" /></>
                   )}
                 </div>
                 {docFile && (
@@ -1463,10 +1472,10 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
               {docsLoading ? <div className="space-y-2">{[...Array(3)].map((_, i) => <div key={i} className="h-12 animate-pulse rounded-xl bg-slate-100" />)}</div> : docList.length === 0 ? (
                 <div className="py-8 text-center text-slate-400"><FileText size={28} className="mx-auto mb-2 opacity-30" /><p className="text-xs font-semibold">No documents found</p></div>
               ) : (
-                <table className="w-full text-left text-xs">
+                <div className="overflow-x-auto"><table className="w-full text-left text-xs min-w-[500px]">
                   <thead style={{ backgroundColor: NAVY, color: "white" }}><tr><th className="p-2.5">File Name</th><th className="p-2.5">Client</th><th className="p-2.5">Uploaded</th></tr></thead>
                   <tbody>{docList.map((doc: any) => <tr key={doc.id} className="border-b border-slate-100 last:border-0"><td className="p-2.5 font-semibold">{doc.filename || doc.name}</td><td className="p-2.5 text-slate-600">{doc.client_name || "—"}</td><td className="p-2.5 text-slate-400">{formatDate(doc.created_at)}</td></tr>)}</tbody>
-                </table>
+                </table></div>
               )}
             </div>
           </>
