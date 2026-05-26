@@ -1090,6 +1090,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [submissions, setSubmissions] = useState<IntakeSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState<"dashboard" | "clients" | "documents" | "appointments" | "messages">("dashboard");
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -1125,111 +1126,202 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     catch { return d; }
   };
 
+  const navItems: { icon: any; label: string; key: typeof activeTab }[] = [
+    { icon: BarChart3, label: "Dashboard", key: "dashboard" },
+    { icon: Users, label: "Clients", key: "clients" },
+    { icon: Upload, label: "Documents", key: "documents" },
+    { icon: Calendar, label: "Appointments", key: "appointments" },
+    { icon: Mail, label: "Messages", key: "messages" },
+  ];
+
   return (
-    <div className="mx-auto grid max-w-7xl gap-6 px-5 py-8 md:grid-cols-[250px_1fr]">
-      <aside className="rounded-3xl p-5 text-white shadow-xl" style={{ backgroundColor: NAVY }}>
-        <div className="mb-6 flex items-center gap-3 text-lg font-black">
-          <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white p-1">
+    <div className="mx-auto grid max-w-7xl gap-6 px-4 py-6 md:grid-cols-[220px_1fr] lg:px-5 lg:py-8">
+      <aside className="rounded-2xl p-4 text-white shadow-xl lg:rounded-3xl lg:p-5" style={{ backgroundColor: NAVY }}>
+        <div className="mb-5 flex items-center gap-2.5 text-base font-black lg:mb-6 lg:text-lg">
+          <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-white p-1 lg:h-10 lg:w-10">
             <img src={LOGO_URL} alt="Apex Tax" className="h-full w-full object-contain" />
           </div>
-          <span>Admin Portal</span>
+          <span className="hidden sm:block">Admin Portal</span>
         </div>
-        {[
-          { icon: BarChart3, label: "Dashboard", active: true },
-          { icon: Users, label: "Clients" },
-          { icon: Upload, label: "Documents" },
-          { icon: Calendar, label: "Appointments" },
-          { icon: Mail, label: "Messages" },
-        ].map((item) => {
+        {navItems.map((item) => {
           const Icon = item.icon;
           return (
-            <div className={`mb-2 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold ${item.active ? "bg-white/20" : "hover:bg-white/10"}`} key={item.label}>
-              <Icon size={18} /><span>{item.label}</span>
-            </div>
+            <button
+              onClick={() => setActiveTab(item.key)}
+              className={`mb-1.5 flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold transition lg:gap-3 lg:py-3 ${activeTab === item.key ? "bg-white/20" : "hover:bg-white/10"}`}
+              key={item.key}
+            >
+              <Icon size={16} className="lg:size-[18px]" /><span>{item.label}</span>
+            </button>
           );
         })}
-        <div className="mt-6 border-t border-white/20 pt-4">
-          <button onClick={onLogout} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-300 hover:bg-red-500/20">
-            <LogOut size={18} />Sign Out
+        <div className="mt-4 border-t border-white/20 pt-4 lg:mt-6">
+          <button onClick={onLogout} className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-300 hover:bg-red-500/20 lg:py-3">
+            <LogOut size={16} className="lg:size-[18px]" />Sign Out
           </button>
         </div>
       </aside>
 
       <main>
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-3xl font-black" style={{ color: NAVY }}>Dashboard</h2>
-            <p className="text-slate-500">{loading ? "Loading…" : "Real-time client overview"}</p>
-          </div>
-          <button onClick={fetchData} disabled={loading}
-            className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm hover:bg-slate-50 disabled:opacity-50">
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />Refresh
-          </button>
-        </div>
+        {activeTab === "dashboard" && (
+          <>
+            <div className="mb-5 flex flex-wrap items-center justify-between gap-3 lg:mb-6">
+              <div>
+                <h2 className="text-xl font-black lg:text-3xl" style={{ color: NAVY }}>Dashboard</h2>
+                <p className="text-xs text-slate-500 lg:text-sm">{loading ? "Loading…" : "Real-time client overview"}</p>
+              </div>
+              <button onClick={fetchData} disabled={loading}
+                className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-600 shadow-sm hover:bg-slate-50 disabled:opacity-50 lg:rounded-2xl lg:px-4 lg:py-2 lg:text-sm">
+                  <RefreshCw size={12} className={`${loading ? "animate-spin" : ""} lg:size-4`} />Refresh
+              </button>
+            </div>
 
-        {error && (
-          <div className="mb-4 flex items-center gap-3 rounded-2xl bg-red-50 p-4 text-sm text-red-600">
-            <XCircle size={18} />{error}
-            <button onClick={fetchData} className="ml-auto font-bold underline">Retry</button>
-          </div>
+            {error && (
+              <div className="mb-4 flex items-center gap-3 rounded-xl bg-red-50 p-3 text-xs text-red-600 lg:rounded-2xl lg:p-4 lg:text-sm">
+                <XCircle size={14} className="lg:size-[18px]" />{error}
+                <button onClick={fetchData} className="ml-auto font-bold underline">Retry</button>
+              </div>
+            )}
+
+            {data && (
+              <div className="mb-4 grid grid-cols-2 gap-2 lg:mb-5 lg:grid lg:grid-cols-4 lg:gap-4">
+                <Stat icon={Users} label="Total Clients" value={data.totalClients ?? 0} />
+                <Stat icon={FileText} label="In Progress" value={data.inProgress ?? 0} />
+                <Stat icon={CheckCircle2} label="Filed" value={data.filed ?? 0} />
+                <Stat icon={Upload} label="Pending" value={data.pendingIntake ?? 0} />
+              </div>
+            )}
+
+            <div className="rounded-2xl bg-white p-3 shadow-sm lg:rounded-3xl lg:p-5">
+              <div className="mb-3 flex items-center justify-between lg:mb-4">
+                <h3 className="text-base font-black lg:text-xl" style={{ color: NAVY }}>Intake Submissions</h3>
+                <span className="rounded-full px-2 py-0.5 text-[10px] font-bold text-white lg:px-3 lg:py-1 lg:text-xs" style={{ backgroundColor: GOLD }}>{submissions.length}</span>
+              </div>
+
+              {loading && submissions.length === 0 ? (
+                <div className="space-y-2 lg:space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="h-12 animate-pulse rounded-xl bg-slate-100 lg:h-16 lg:rounded-2xl" />)}</div>
+              ) : submissions.length === 0 ? (
+                <div className="py-8 text-center text-slate-400 lg:py-12">
+                  <ClipboardList size={28} className="mx-auto mb-2 opacity-30 lg:size-10" />
+                  <p className="text-xs font-semibold lg:text-sm">No submissions yet</p>
+                  <p className="mt-1 text-[10px] lg:text-sm">New client intakes appear here</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-[11px] lg:text-sm">
+                    <thead style={{ backgroundColor: NAVY, color: "white" }}>
+                      <tr>
+                        <th className="p-2.5 font-semibold lg:p-4">Client</th>
+                        <th className="p-2.5 font-semibold lg:p-4">Contact</th>
+                        <th className="p-2.5 font-semibold lg:p-4">Tax Type</th>
+                        <th className="p-2.5 font-semibold lg:p-4">Status</th>
+                        <th className="p-2.5 font-semibold lg:p-4">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {submissions.map((s) => (
+                        <tr className="border-b border-slate-100 last:border-0 hover:bg-slate-50" key={s.id}>
+                          <td className="p-2.5 lg:p-4">
+                            <div className="font-bold" style={{ color: NAVY }}>{s.full_name}</div>
+                            {s.message && <div className="mt-0.5 max-w-[120px] truncate text-[10px] text-slate-400 lg:mt-1 lg:max-w-xs lg:text-xs">{s.message}</div>}
+                          </td>
+                          <td className="p-2.5 lg:p-4">
+                            <div className="flex items-center gap-1 text-slate-600 lg:gap-2"><Mail size={10} className="lg:size-[14px]" /><span className="text-[10px] lg:text-xs">{s.email}</span></div>
+                            <div className="mt-0.5 flex items-center gap-1 text-slate-600 lg:mt-1 lg:gap-2"><Phone size={10} className="lg:size-[14px]" /><span className="text-[10px] lg:text-xs">{s.phone}</span></div>
+                          </td>
+                          <td className="p-2.5 lg:p-4"><span className="rounded-full bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold capitalize lg:px-2 lg:py-1 lg:text-xs">{s.tax_type?.replace("-", " ")}</span></td>
+                          <td className="p-2.5 lg:p-4"><span className={`inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-semibold lg:px-3 lg:py-1 lg:text-xs ${statusClass(s.status)}`}>{s.status}</span></td>
+                          <td className="p-2.5 text-[10px] text-slate-400 lg:p-4 lg:text-xs">{formatDate(s.created_at)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
         )}
 
-        {data && (
-          <div className="grid gap-4 md:grid-cols-4">
-            <Stat icon={Users} label="Total Clients" value={data.totalClients ?? 0} />
-            <Stat icon={FileText} label="In Progress" value={data.inProgress ?? 0} />
-            <Stat icon={CheckCircle2} label="Filed" value={data.filed ?? 0} />
-            <Stat icon={Upload} label="Pending Intake" value={data.pendingIntake ?? 0} />
-          </div>
+        {activeTab === "clients" && (
+          <>
+            <div className="mb-5 lg:mb-6">
+              <h2 className="text-xl font-black lg:text-3xl" style={{ color: NAVY }}>Clients</h2>
+              <p className="text-xs text-slate-500 lg:text-sm">Manage all your tax clients</p>
+            </div>
+            <div className="rounded-2xl bg-white p-3 shadow-sm lg:rounded-3xl lg:p-5">
+              <div className="mb-3 flex items-center justify-between lg:mb-4">
+                <h3 className="text-base font-black lg:text-xl" style={{ color: NAVY }}>All Clients</h3>
+                <span className="rounded-full px-2 py-0.5 text-[10px] font-bold text-white" style={{ backgroundColor: GOLD }}>{clients.length}</span>
+              </div>
+              <div className="space-y-2 lg:space-y-3">
+                {clients.map((client) => (
+                  <div key={client.email} className="flex items-center justify-between rounded-xl border border-slate-100 p-2.5 lg:rounded-2xl lg:p-4">
+                    <div>
+                      <div className="font-bold" style={{ color: NAVY }}>{client.name}</div>
+                      <div className="mt-0.5 flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-slate-500 lg:mt-1 lg:text-xs">
+                        <span>{client.phone}</span>
+                        <span>{client.email}</span>
+                        <span className="capitalize">{client.type.toLowerCase()}</span>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs font-bold" style={{ color: GOLD }}>{client.refund}</div>
+                      <span className={`mt-1 inline-flex rounded-full px-1.5 py-0.5 text-[10px] font-semibold lg:px-2.5 lg:py-0.5 lg:text-xs ${statusClass(client.status)}`}>{client.status}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
         )}
 
-        <div className="mt-6 rounded-3xl bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-xl font-black" style={{ color: NAVY }}>Intake Submissions</h3>
-            <span className="rounded-full px-3 py-1 text-xs font-bold text-white" style={{ backgroundColor: GOLD }}>{submissions.length}</span>
-          </div>
+        {activeTab === "documents" && (
+          <>
+            <div className="mb-5 lg:mb-6">
+              <h2 className="text-xl font-black lg:text-3xl" style={{ color: NAVY }}>Documents</h2>
+              <p className="text-xs text-slate-500 lg:text-sm">Secure document storage and management</p>
+            </div>
+            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 text-center shadow-sm">
+              <div className="mb-3 rounded-2xl p-4" style={{ backgroundColor: PALE_GOLD }}>
+                <Upload size={28} style={{ color: GOLD }} />
+              </div>
+              <h3 className="text-base font-bold" style={{ color: NAVY }}>No documents uploaded</h3>
+              <p className="mt-1 max-w-xs text-xs text-slate-500">Documents uploaded by clients via the intake portal will appear here.</p>
+            </div>
+          </>
+        )}
 
-          {loading && submissions.length === 0 ? (
-            <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="h-16 animate-pulse rounded-2xl bg-slate-100" />)}</div>
-          ) : submissions.length === 0 ? (
-            <div className="py-12 text-center text-slate-400">
-              <ClipboardList size={40} className="mx-auto mb-3 opacity-30" />
-              <p className="font-semibold">No submissions yet</p>
-              <p className="text-sm">New client intakes appear here</p>
+        {activeTab === "appointments" && (
+          <>
+            <div className="mb-5 lg:mb-6">
+              <h2 className="text-xl font-black lg:text-3xl" style={{ color: NAVY }}>Appointments</h2>
+              <p className="text-xs text-slate-500 lg:text-sm">Schedule and manage client appointments</p>
             </div>
-          ) : (
-            <div className="overflow-hidden rounded-2xl border">
-              <table className="w-full text-left text-sm">
-                <thead style={{ backgroundColor: NAVY, color: "white" }}>
-                  <tr>
-                    <th className="p-4 font-semibold">Client</th>
-                    <th className="p-4 font-semibold">Contact</th>
-                    <th className="p-4 font-semibold">Tax Type</th>
-                    <th className="p-4 font-semibold">Status</th>
-                    <th className="p-4 font-semibold">Date</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {submissions.map((s) => (
-                    <tr className="border-b last:border-0 hover:bg-slate-50" key={s.id}>
-                      <td className="p-4">
-                        <div className="font-bold" style={{ color: NAVY }}>{s.full_name}</div>
-                        {s.message && <div className="mt-1 max-w-xs truncate text-xs text-slate-400">{s.message}</div>}
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2 text-slate-600"><Mail size={14} /><span className="text-xs">{s.email}</span></div>
-                        <div className="mt-1 flex items-center gap-2 text-slate-600"><Phone size={14} /><span className="text-xs">{s.phone}</span></div>
-                      </td>
-                      <td className="p-4"><span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold capitalize">{s.tax_type?.replace("-", " ")}</span></td>
-                      <td className="p-4"><span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusClass(s.status)}`}>{s.status}</span></td>
-                      <td className="p-4 text-xs text-slate-400">{formatDate(s.created_at)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 text-center shadow-sm">
+              <div className="mb-3 rounded-2xl p-4" style={{ backgroundColor: PALE_GOLD }}>
+                <Calendar size={28} style={{ color: GOLD }} />
+              </div>
+              <h3 className="text-base font-bold" style={{ color: NAVY }}>No appointments scheduled</h3>
+              <p className="mt-1 max-w-xs text-xs text-slate-500">Client consultation appointments will appear here once scheduled.</p>
             </div>
-          )}
-        </div>
+          </>
+        )}
+
+        {activeTab === "messages" && (
+          <>
+            <div className="mb-5 lg:mb-6">
+              <h2 className="text-xl font-black lg:text-3xl" style={{ color: NAVY }}>Messages</h2>
+              <p className="text-xs text-slate-500 lg:text-sm">Client communications and notifications</p>
+            </div>
+            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 text-center shadow-sm">
+              <div className="mb-3 rounded-2xl p-4" style={{ backgroundColor: PALE_GOLD }}>
+                <Mail size={28} style={{ color: GOLD }} />
+              </div>
+              <h3 className="text-base font-bold" style={{ color: NAVY }}>No messages</h3>
+              <p className="mt-1 max-w-xs text-xs text-slate-500">Client messages and system notifications will appear here.</p>
+            </div>
+          </>
+        )}
       </main>
     </div>
   );
