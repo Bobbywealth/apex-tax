@@ -1243,7 +1243,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     setDocError("");
     try {
       const docs = await api.documents.list(clientId);
-      setDocList(docs || []);
+      setDocList((docs as any)?.documents || []);
     } catch {
       setDocList([]);
     } finally {
