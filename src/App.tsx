@@ -197,17 +197,17 @@ function PortalClientCard({ name, subtitle, status }: { name: string; subtitle: 
 }
 
 export default function App() {
-  const [view, setView] = useState("website");
+  const [view] = useState("website");
 
   return (
     <div className="min-h-screen text-slate-900" style={{ backgroundColor: LIGHT_BG }}>
-      <Header view={view} setView={setView} />
+      <Header />
       {view === "website" ? <Website /> : <Dashboard />}
     </div>
   );
 }
 
-function Header({ view, setView }: { view: string; setView: (v: string) => void }) {
+function Header() {
   return (
     <header className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5">
@@ -232,37 +232,34 @@ function Header({ view, setView }: { view: string; setView: (v: string) => void 
         </div>
 
         <nav className="hidden items-center gap-7 text-sm font-semibold text-slate-600 md:flex">
-          {navItems.map((item) => (
-            <a
-              key={item}
-              href={`#${item.toLowerCase().replace(" docs", "").replace(" ", "-")}`}
-            >
-              {item}
-            </a>
-          ))}
+          {navItems.map((item) => {
+            const idMap: Record<string, string> = {
+              "Home": "home",
+              "Services": "services",
+              "Upload Docs": "upload",
+              "Contact": "contact",
+            };
+            return (
+              <a key={item} href={`#${idMap[item] || item.toLowerCase().replace(" ", "-")}`}>
+                {item}
+              </a>
+            );
+          })}
         </nav>
 
         <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setView("website")}
-            className={`rounded-xl px-4 py-2 text-sm font-bold ${
-              view === "website" ? "text-white" : "bg-slate-100"
-            }`}
-            style={view === "website" ? { backgroundColor: NAVY } : undefined}
+          <a
+            href="/contact"
+            className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-200"
           >
-            Front End
-          </button>
-          <button
-            type="button"
-            onClick={() => setView("dashboard")}
-            className={`rounded-xl px-4 py-2 text-sm font-bold ${
-              view === "dashboard" ? "text-white" : "bg-slate-100"
-            }`}
-            style={view === "dashboard" ? { backgroundColor: GOLD } : undefined}
+            Contact Us
+          </a>
+          <a
+            href="/privacy-policy"
+            className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-200"
           >
-            Dashboard
-          </button>
+            Privacy Policy
+          </a>
         </div>
       </div>
     </header>
