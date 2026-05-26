@@ -201,8 +201,29 @@ function PortalClientCard({ name, subtitle, status }: { name: string; subtitle: 
 }
 
 export default function App() {
-  const [view, setView] = useState<"website" | "dashboard">("website");
+  const [view, setView] = useState<"website" | "dashboard">(() => {
+    const hash = window.location.hash.replace("#", "");
+    return hash === "dashboard" || hash === "admin" ? "dashboard" : "website";
+  });
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
+
+  // Handle hash changes from Header nav links
+  useEffect(() => {
+    const onHash = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (hash === "dashboard" || hash === "admin") {
+        setView("dashboard");
+      } else {
+        setView("website");
+        setTimeout(() => {
+          const el = document.getElementById(hash);
+          if (el) el.scrollIntoView({ behavior: "smooth" });
+        }, 50);
+      }
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
 
   const handleLogin = useCallback((t: string) => {
     localStorage.setItem(TOKEN_KEY, t);
