@@ -314,21 +314,6 @@ function Header({
                 {item}
               </a>
             ))}
-            <hr className="my-2 border-slate-100" />
-            <a
-              href="/contact"
-              onClick={() => setMenuOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-            >
-              Contact Us
-            </a>
-            <a
-              href="/privacy-policy"
-              onClick={() => setMenuOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-            >
-              Privacy Policy
-            </a>
           </nav>
         </div>
       )}
@@ -367,18 +352,6 @@ function Header({
 
         {/* Right buttons */}
         <div className="flex gap-2">
-          <a
-            href="/contact"
-            className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-200"
-          >
-            Contact Us
-          </a>
-          <a
-            href="/privacy-policy"
-            className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-200"
-          >
-            Privacy Policy
-          </a>
           {isLoggedIn ? (
             <>
               <button
@@ -399,9 +372,10 @@ function Header({
           ) : (
             <button
               onClick={() => setView("dashboard")}
-              className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-200"
+              className="rounded-xl px-5 py-2 text-sm font-bold text-white transition hover:opacity-90"
+              style={{ backgroundColor: NAVY }}
             >
-              Admin
+              Admin Login
             </button>
           )}
         </div>
@@ -420,6 +394,26 @@ function Website({ onAdminClick }: { onAdminClick: () => void }) {
       <WhyChooseSection />
       <ProcessIntakeSection />
       <FinalCta onAdminClick={onAdminClick} />
+
+      {/* Footer */}
+      <footer className="border-t border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-4 px-5 py-8 md:flex-row">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center overflow-hidden rounded-lg bg-white p-1 shadow ring-1 ring-slate-100">
+              <img src={LOGO_URL} alt="Apex Tax" className="h-full w-full object-contain" />
+            </div>
+            <div>
+              <div className="text-sm font-black leading-none" style={{ color: NAVY }}>APEX TAX</div>
+              <div className="text-[9px] font-semibold tracking-[0.15em]" style={{ color: GOLD }}>BUSINESS GROUP</div>
+            </div>
+          </div>
+          <div className="flex gap-6 text-sm text-slate-500">
+            <a href="/contact" className="hover:text-slate-800">Contact Us</a>
+            <a href="/privacy-policy" className="hover:text-slate-800">Privacy Policy</a>
+          </div>
+          <p className="text-xs text-slate-400">© {new Date().getFullYear()} Apex Tax Business Group. All rights reserved.</p>
+        </div>
+      </footer>
     </main>
   );
 }
