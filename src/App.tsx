@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { api } from "./services/api";
 import { motion } from "framer-motion";
 import {
@@ -8,12 +8,14 @@ import {
   ClipboardList,
   FileText,
   Lock,
+  LogOut,
   Mail,
   Phone,
-  Search,
+  RefreshCw,
   ShieldCheck,
   Upload,
   Users,
+  XCircle,
 } from "lucide-react";
 
 const NAVY = "#132D52";
@@ -22,6 +24,7 @@ const PALE_GOLD = "#F8EBC9";
 const LIGHT_BG = "#F1F1F1";
 const LOGO_URL = "https://i.imgur.com/0uQZnHh.png";
 const HERO_IMAGE_URL = "https://i.imgur.com/5zFrwzm.png";
+const TOKEN_KEY = "apex-admin-token";
 
 const clients = [
   {
@@ -160,7 +163,7 @@ function Pill({ children }: { children: React.ReactNode }) {
     </span>
   );
 }
-function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: string }) {
+function Stat({ icon: Icon, label, value }: { icon: any; label: string; value: string | number }) {
   return (
     <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
       <div className="flex items-center justify-between gap-4">
@@ -198,17 +201,42 @@ function PortalClientCard({ name, subtitle, status }: { name: string; subtitle: 
 }
 
 export default function App() {
-  const [view] = useState("website");
+  const [view, setView] = useState<"website" | "dashboard">("website");
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
+
+  const handleLogin = useCallback((t: string) => {
+    localStorage.setItem(TOKEN_KEY, t);
+    setToken(t);
+    setView("dashboard");
+  }, []);
+
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem(TOKEN_KEY);
+    setToken(null);
+    setView("website");
+  }, []);
 
   return (
     <div className="min-h-screen text-slate-900" style={{ backgroundColor: LIGHT_BG }}>
-      <Header />
-      {view === "website" ? <Website /> : <Dashboard />}
+      <Header view={view} setView={setView} isLoggedIn={!!token} />
+      {view === "website" ? (
+        <Website />
+      ) : !token ? (
+        <AdminLogin onLogin={handleLogin} />
+      ) : (
+        <AdminDashboard onLogout={handleLogout} />
+      )}
     </div>
   );
 }
 
-function Header() {
+function Header({
+  view, setView, isLoggedIn,
+}: {
+  view: "website" | "dashboard";
+  setView: (v: "website" | "dashboard") => void;
+  isLoggedIn: boolean;
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const idMap: Record<string, string> = {
@@ -328,6 +356,31 @@ function Header() {
           >
             Privacy Policy
           </a>
+          {isLoggedIn ? (
+            <>
+              <button
+                onClick={() => setView("website")}
+                className={`rounded-xl px-4 py-2 text-sm font-bold ${view === "website" ? "text-white" : "bg-slate-100"}`}
+                style={view === "website" ? { backgroundColor: NAVY } : undefined}
+              >
+                Front End
+              </button>
+              <button
+                onClick={() => setView("dashboard")}
+                className={`rounded-xl px-4 py-2 text-sm font-bold ${view === "dashboard" ? "text-white" : "bg-slate-100"}`}
+                style={view === "dashboard" ? { backgroundColor: GOLD } : undefined}
+              >
+                Dashboard
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setView("dashboard")}
+              className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-200"
+            >
+              Admin
+            </button>
+          )}
         </div>
       </div>
     </header>
@@ -398,9 +451,10 @@ function HeroSection() {
 
               <button
                 type="button"
+                onClick={() => { window.scrollTo({ top: 0, behavior: "smooth" }); (document.querySelector("#admin") as HTMLElement)?.scrollIntoView({ behavior: "smooth" }); }}
                 className="group rounded-xl border border-[#D5AA44]/70 bg-transparent px-7 py-4 font-black text-white transition hover:bg-white/10"
               >
-                Access Client Portal
+                Admin Login
               </button>
             </div>
 
@@ -889,110 +943,238 @@ function FinalCta() {
     </section>
   );
 }
-function Dashboard() {
-  const testSummary = useMemo(() => demoTests.every((test) => test.pass), []);
+// ─── Admin Login ────────────────────────────────────────────────
+function AdminLogin({ onLogin }: { onLogin: (token: string) => void }) {
+  const [username, setUsername] = useState("admin@apexbg.com");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await api.auth.login(username, password);
+      const token = res.token || res.accessToken || res.data?.token || "";
+      if (!token) throw new Error("No token received");
+      onLogin(token);
+    } catch (err: any) {
+      setError(err.message || "Invalid credentials");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex min-h-[70vh] items-center justify-center px-5">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md rounded-[2rem] bg-white p-10 shadow-2xl"
+      >
+        <div className="mb-8 flex flex-col items-center text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white shadow ring-1 ring-slate-200">
+            <img src={LOGO_URL} alt="Apex Tax" className="h-full w-full object-contain" />
+          </div>
+          <h2 className="text-2xl font-black" style={{ color: NAVY }}>Admin Portal</h2>
+          <p className="mt-2 text-sm text-slate-500">Sign in to access the dashboard</p>
+        </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="mb-1 block text-sm font-semibold text-slate-600">Username</label>
+            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)}
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100" required />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-semibold text-slate-600">Password</label>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••"
+              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100" required />
+          </div>
+          {error && (
+            <div className="flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600">
+              <XCircle size={16} />{error}
+            </div>
+          )}
+          <button type="submit" disabled={loading}
+            className="w-full rounded-xl py-3 text-sm font-bold text-white shadow-lg hover:scale-[1.02] disabled:opacity-60"
+            style={{ backgroundColor: NAVY }}>
+            {loading ? "Signing in…" : "Sign In"}
+          </button>
+        </form>
+      </motion.div>
+    </div>
+  );
+}
+
+// ─── Admin Dashboard ────────────────────────────────────────────
+interface DashboardData {
+  totalClients: number;
+  inProgress: number;
+  filed: number;
+  pendingIntake: number;
+}
+
+interface IntakeSubmission {
+  id: string;
+  full_name: string;
+  email: string;
+  phone: string;
+  tax_type: string;
+  message: string;
+  documents_count: number;
+  status: string;
+  created_at: string;
+}
+
+function AdminDashboard({ onLogout }: { onLogout: () => void }) {
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [submissions, setSubmissions] = useState<IntakeSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const [statsData, intakeData] = await Promise.all([
+        api.admin.stats(),
+        api.intake.list(),
+      ]);
+      setData(statsData.stats || statsData);
+      setSubmissions(intakeData || []);
+    } catch (err: any) {
+      if (err.message.includes("401") || err.message.includes("Invalid")) { onLogout(); return; }
+      setError(err.message || "Failed to load dashboard");
+    } finally {
+      setLoading(false);
+    }
+  }, [onLogout]);
+
+  useEffect(() => { fetchData(); }, [fetchData]);
+
+  const statusColor: Record<string, string> = {
+    Pending: "bg-amber-100 text-amber-700",
+    "In Review": "bg-blue-100 text-blue-700",
+    "Ready to File": "bg-emerald-100 text-emerald-700",
+    Filed: "bg-slate-100 text-slate-600",
+    "Documents Needed": "bg-orange-100 text-orange-700",
+  };
+  const statusClass = (s: string) => statusColor[s] || "bg-slate-100 text-slate-600";
+
+  const formatDate = (d: string) => {
+    try { return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }); }
+    catch { return d; }
+  };
 
   return (
     <div className="mx-auto grid max-w-7xl gap-6 px-5 py-8 md:grid-cols-[250px_1fr]">
       <aside className="rounded-3xl p-5 text-white shadow-xl" style={{ backgroundColor: NAVY }}>
         <div className="mb-6 flex items-center gap-3 text-lg font-black">
           <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white p-1">
-            <img src={LOGO_URL} alt="Apex Tax logo icon" className="h-full w-full object-contain" />
+            <img src={LOGO_URL} alt="Apex Tax" className="h-full w-full object-contain" />
           </div>
           <span>Admin Portal</span>
         </div>
         {[
-          { icon: BarChart3, label: "Dashboard" },
+          { icon: BarChart3, label: "Dashboard", active: true },
           { icon: Users, label: "Clients" },
           { icon: Upload, label: "Documents" },
           { icon: Calendar, label: "Appointments" },
           { icon: Mail, label: "Messages" },
-          { icon: ClipboardList, label: "Tax Status" },
         ].map((item) => {
           const Icon = item.icon;
           return (
-            <div
-              className="mb-2 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold hover:bg-white/10"
-              key={item.label}
-            >
-              <Icon size={18} />
-              <span>{item.label}</span>
+            <div className={`mb-2 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold ${item.active ? "bg-white/20" : "hover:bg-white/10"}`} key={item.label}>
+              <Icon size={18} /><span>{item.label}</span>
             </div>
           );
         })}
+        <div className="mt-6 border-t border-white/20 pt-4">
+          <button onClick={onLogout} className="flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-red-300 hover:bg-red-500/20">
+            <LogOut size={18} />Sign Out
+          </button>
+        </div>
       </aside>
+
       <main>
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-3xl font-black" style={{ color: NAVY }}>
-              Demo Client Dashboard
-            </h2>
-            <p className="text-slate-500">
-              Store client details, tax filing status, notes, and uploaded tax documents.
-            </p>
+            <h2 className="text-3xl font-black" style={{ color: NAVY }}>Dashboard</h2>
+            <p className="text-slate-500">{loading ? "Loading…" : "Real-time client overview"}</p>
           </div>
-          <button type="button" className="rounded-2xl px-5 py-3 font-bold text-white" style={{ backgroundColor: GOLD }}>
-            + Add Client
+          <button onClick={fetchData} disabled={loading}
+            className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm hover:bg-slate-50 disabled:opacity-50">
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />Refresh
           </button>
         </div>
-        <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 text-sm shadow-sm">
-          <span className="font-bold" style={{ color: NAVY }}>
-            Demo Checks:
-          </span>
-          <span className={testSummary ? "ml-2 text-emerald-600" : "ml-2 text-red-600"}>
-            {testSummary ? "All demo data checks passed" : "Some demo data checks failed"}
-          </span>
-        </div>
-        <div className="grid gap-4 md:grid-cols-4">
-          <Stat icon={Users} label="Total Clients" value="32" />
-          <Stat icon={FileText} label="In Progress" value="11" />
-          <Stat icon={Upload} label="Docs Needed" value="7" />
-          <Stat icon={CheckCircle2} label="Filed" value="18" />
-        </div>
+
+        {error && (
+          <div className="mb-4 flex items-center gap-3 rounded-2xl bg-red-50 p-4 text-sm text-red-600">
+            <XCircle size={18} />{error}
+            <button onClick={fetchData} className="ml-auto font-bold underline">Retry</button>
+          </div>
+        )}
+
+        {data && (
+          <div className="grid gap-4 md:grid-cols-4">
+            <Stat icon={Users} label="Total Clients" value={data.totalClients ?? 0} />
+            <Stat icon={FileText} label="In Progress" value={data.inProgress ?? 0} />
+            <Stat icon={CheckCircle2} label="Filed" value={data.filed ?? 0} />
+            <Stat icon={Upload} label="Pending Intake" value={data.pendingIntake ?? 0} />
+          </div>
+        )}
+
         <div className="mt-6 rounded-3xl bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center gap-3 rounded-2xl bg-slate-50 px-4 py-3">
-            <Search size={18} />
-            <span className="text-sm text-slate-500">Search clients by name, phone, email, status...</span>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-xl font-black" style={{ color: NAVY }}>Intake Submissions</h3>
+            <span className="rounded-full px-3 py-1 text-xs font-bold text-white" style={{ backgroundColor: GOLD }}>{submissions.length}</span>
           </div>
-          <div className="overflow-hidden rounded-2xl border">
-            <table className="w-full text-left text-sm">
-              <thead style={{ backgroundColor: NAVY, color: "white" }}>
-                <tr>
-                  <th className="p-4">Client</th>
-                  <th>Contact</th>
-                  <th>Type</th>
-                  <th>Status</th>
-                  <th>Refund Est.</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clients.map((client) => (
-                  <tr className="border-b last:border-0" key={client.email}>
-                    <td className="p-4 font-bold" style={{ color: NAVY }}>
-                      {client.name}
-                    </td>
-                    <td>
-                      <div className="flex items-center gap-2">
-                        <Phone size={14} />
-                        <span>{client.phone}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-slate-500">
-                        <Mail size={14} />
-                        <span>{client.email}</span>
-                      </div>
-                    </td>
-                    <td>{client.type}</td>
-                    <td>
-                      <Pill>{client.status}</Pill>
-                    </td>
-                    <td className="font-bold">{client.refund}</td>
+
+          {loading && submissions.length === 0 ? (
+            <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="h-16 animate-pulse rounded-2xl bg-slate-100" />)}</div>
+          ) : submissions.length === 0 ? (
+            <div className="py-12 text-center text-slate-400">
+              <ClipboardList size={40} className="mx-auto mb-3 opacity-30" />
+              <p className="font-semibold">No submissions yet</p>
+              <p className="text-sm">New client intakes appear here</p>
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-2xl border">
+              <table className="w-full text-left text-sm">
+                <thead style={{ backgroundColor: NAVY, color: "white" }}>
+                  <tr>
+                    <th className="p-4 font-semibold">Client</th>
+                    <th className="p-4 font-semibold">Contact</th>
+                    <th className="p-4 font-semibold">Tax Type</th>
+                    <th className="p-4 font-semibold">Status</th>
+                    <th className="p-4 font-semibold">Date</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {submissions.map((s) => (
+                    <tr className="border-b last:border-0 hover:bg-slate-50" key={s.id}>
+                      <td className="p-4">
+                        <div className="font-bold" style={{ color: NAVY }}>{s.full_name}</div>
+                        {s.message && <div className="mt-1 max-w-xs truncate text-xs text-slate-400">{s.message}</div>}
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center gap-2 text-slate-600"><Mail size={14} /><span className="text-xs">{s.email}</span></div>
+                        <div className="mt-1 flex items-center gap-2 text-slate-600"><Phone size={14} /><span className="text-xs">{s.phone}</span></div>
+                      </td>
+                      <td className="p-4"><span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold capitalize">{s.tax_type?.replace("-", " ")}</span></td>
+                      <td className="p-4"><span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusClass(s.status)}`}>{s.status}</span></td>
+                      <td className="p-4 text-xs text-slate-400">{formatDate(s.created_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </main>
     </div>
   );
 }
+
+// ─── Original Demo Dashboard (kept for reference) ───────────────
