@@ -427,13 +427,13 @@ function HeroSection({ onAdminClick }: { onAdminClick: () => void }) {
               NJ's Trusted Tax Experts
             </div>
 
-            <h1 className="mt-8 max-w-4xl text-5xl font-black leading-[0.98] tracking-tight text-white md:text-7xl">
+            <h1 className="mt-6 max-w-4xl text-4xl font-black leading-[0.98] tracking-tight text-white sm:mt-8 sm:text-5xl md:text-6xl lg:text-7xl">
               Smart Tax Solutions. Real Client Care.
             </h1>
 
             <div className="mt-8 h-1 w-20 rounded-full" style={{ backgroundColor: GOLD }} />
 
-            <p className="mt-7 max-w-2xl text-xl leading-9 text-slate-200">
+            <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-200 sm:mt-7 sm:text-lg sm:leading-9 lg:text-xl">
               Expert tax filing for individuals and self-employed clients with a secure client portal, simple uploads, real-time updates, and personal support.
             </p>
 
@@ -479,7 +479,7 @@ function HeroSection({ onAdminClick }: { onAdminClick: () => void }) {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.08 }}
-            className="relative"
+            className="relative hidden lg:block"
           >
             <div className="absolute -right-10 top-10 h-48 w-48 rounded-full blur-3xl"
               style={{ backgroundColor: GOLD, opacity: 0.18 }}
@@ -523,15 +523,15 @@ function FeaturedImageSection() {
               />
               <div className="absolute inset-0 bg-gradient-to-br from-[#081A33] via-[#132D52]/90 to-[#132D52]" />
 
-              <div className="relative flex h-full flex-col justify-between p-10 text-white">
+              <div className="relative flex h-full flex-col justify-between p-6 sm:p-10 text-white">
                 <div>
                   <Pill>Premium Client Experience</Pill>
-                  <h3 className="mt-6 max-w-xl text-5xl font-black leading-tight">
+                  <h3 className="mt-4 text-3xl font-black leading-tight sm:mt-6 sm:text-4xl lg:text-5xl">
                     A Modern Tax Company Built Around Simplicity & Trust.
                   </h3>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-3">
+                <div className="mt-6 grid gap-3 sm:mt-0 sm:grid gap-4 sm:grid-cols-3">
                   {[
                     ["Encrypted", "Secure Uploads"],
                     ["Fast", "Status Updates"],
@@ -546,23 +546,23 @@ function FeaturedImageSection() {
               </div>
             </div>
 
-            <div className="bg-white p-10">
-              <div className="flex items-center justify-between">
+            <div className="bg-white p-6 sm:p-10">
+              <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-sm font-bold uppercase tracking-[0.25em] text-slate-400">
+                  <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 sm:text-sm">
                     Secure Client Portal
                   </div>
-                  <h3 className="mt-2 text-4xl font-black" style={{ color: NAVY }}>
+                  <h3 className="mt-2 text-2xl font-black sm:text-3xl lg:text-4xl" style={{ color: NAVY }}>
                     Tax Filing Activity
                   </h3>
                 </div>
 
-                <div className="rounded-2xl p-4" style={{ backgroundColor: PALE_GOLD }}>
-                  <ShieldCheck size={28} style={{ color: GOLD }} />
+                <div className="rounded-2xl p-3" style={{ backgroundColor: PALE_GOLD }}>
+                  <ShieldCheck size={24} style={{ color: GOLD }} className="sm:w-7 sm:h-7" />
                 </div>
               </div>
 
-              <div className="mt-8 space-y-5">
+              <div className="mt-6 space-y-3 sm:mt-8 sm:space-y-5">
                 <div className="rounded-2xl border border-slate-100 bg-slate-50 p-5">
                   <div className="flex items-center justify-between">
                     <div>
@@ -626,11 +626,11 @@ function ServicesSection() {
         <div className="mb-16 flex flex-col justify-between gap-10 lg:flex-row lg:items-end">
           <div className="max-w-3xl">
             <Pill>Trusted Tax Filing Support</Pill>
-            <h2 className="mt-6 text-5xl font-black leading-tight md:text-6xl" style={{ color: NAVY }}>
+            <h2 className="mt-4 text-3xl font-black leading-tight sm:mt-6 sm:text-4xl lg:text-5xl md:text-6xl" style={{ color: NAVY }}>
               Tax Services Designed For Individuals & Self-Employed Filers.
             </h2>
           </div>
-          <div className="max-w-lg rounded-[2rem] bg-white p-8 shadow-2xl">
+          <div className="max-w-lg rounded-[2rem] bg-white p-6 shadow-2xl sm:p-8">
             <div className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400">
               Average Refund Tracked
             </div>
@@ -648,17 +648,17 @@ function ServicesSection() {
             return (
               <motion.div
                 whileHover={{ y: -8 }}
-                className="rounded-3xl bg-white p-8 shadow-lg transition"
+                className="rounded-3xl bg-white p-6 shadow-lg transition sm:p-8"
                 key={service.title}
               >
-                <div className="mb-6 inline-flex rounded-2xl p-4" style={{ backgroundColor: PALE_GOLD }}>
-                  <Icon style={{ color: GOLD }} size={34} />
+                <div className="mb-4 inline-flex rounded-2xl p-3 sm:mb-6 sm:p-4" style={{ backgroundColor: PALE_GOLD }}>
+                  <Icon style={{ color: GOLD }} size={28} className="sm:w-8 sm:h-8" />
                 </div>
-                <h3 className="text-2xl font-black" style={{ color: NAVY }}>
+                <h3 className="text-xl font-black sm:text-2xl" style={{ color: NAVY }}>
                   {service.title}
                 </h3>
-                <p className="mt-4 leading-7 text-slate-600">{service.text}</p>
-                <button type="button" className="mt-6 font-bold" style={{ color: GOLD }}>
+                <p className="mt-3 leading-6 text-slate-600 sm:mt-4 sm:leading-7">{service.text}</p>
+                <button type="button" className="mt-4 text-sm font-bold sm:mt-6" style={{ color: GOLD }}>
                   Learn More →
                 </button>
               </motion.div>
@@ -677,12 +677,12 @@ function TestimonialsSection() {
         style={{ background: `radial-gradient(circle at center, ${GOLD}, transparent 60%)` }}
       />
       <div className="relative mx-auto max-w-7xl px-5">
-        <div className="mb-16 text-center text-white">
+        <div className="mb-10 text-center text-white sm:mb-16">
           <Pill>Client Success Stories</Pill>
-          <h2 className="mt-6 text-5xl font-black leading-tight md:text-6xl">
+          <h2 className="mt-4 text-3xl font-black leading-tight sm:mt-6 sm:text-4xl lg:text-5xl md:text-6xl">
             Trusted By Individuals, Families & Self-Employed Filers.
           </h2>
-          <p className="mx-auto mt-6 max-w-3xl text-xl leading-9 text-slate-300">
+          <p className="mx-auto mt-4 max-w-3xl text-base leading-relaxed text-slate-300 sm:mt-6 sm:text-lg">
             Apex Tax Business Group delivers a premium tax filing experience with simple uploads, clear updates, and organized client communication.
           </p>
         </div>
@@ -691,14 +691,14 @@ function TestimonialsSection() {
             <motion.div
               whileHover={{ y: -8 }}
               key={testimonial.name}
-              className="rounded-[2rem] bg-white p-8 shadow-2xl"
+              className="rounded-[2rem] bg-white p-6 shadow-2xl sm:p-8"
             >
-              <div className="mb-6 flex gap-1 text-2xl" style={{ color: GOLD }}>
+              <div className="mb-4 flex gap-1 text-lg sm:mb-6 sm:text-2xl" style={{ color: GOLD }}>
                 ★★★★★
               </div>
-              <p className="text-lg leading-8 text-slate-600">"{testimonial.quote}"</p>
-              <div className="mt-8 border-t pt-5">
-                <div className="text-xl font-black" style={{ color: NAVY }}>
+              <p className="text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">"{testimonial.quote}"</p>
+              <div className="mt-6 border-t pt-4 sm:mt-8 sm:pt-5">
+                <div className="text-lg font-black sm:text-xl" style={{ color: NAVY }}>
                   {testimonial.name}
                 </div>
                 <div className="text-sm text-slate-500">Verified Client</div>
@@ -725,21 +725,21 @@ function WhyChooseSection() {
       <div className="mx-auto grid max-w-7xl gap-16 px-5 md:grid-cols-2 md:items-center">
         <div>
           <Pill>Why Choose Apex</Pill>
-          <h2 className="mt-5 text-5xl font-black leading-tight" style={{ color: NAVY }}>
+          <h2 className="mt-4 text-3xl font-black leading-tight sm:mt-5 sm:text-4xl lg:text-5xl" style={{ color: NAVY }}>
             Built Around Trust, Speed, and Professionalism.
           </h2>
-          <div className="mt-10 grid gap-6">
+          <div className="mt-6 grid gap-3 sm:mt-10 sm:grid gap-6">
             {reasons.map((item) => (
-              <div key={item} className="flex items-start gap-4 rounded-2xl bg-slate-50 p-5">
-                <div className="mt-1 rounded-full p-2" style={{ backgroundColor: PALE_GOLD }}>
-                  <CheckCircle2 size={18} style={{ color: GOLD }} />
+              <div key={item} className="flex items-start gap-3 rounded-2xl bg-slate-50 p-4 sm:gap-4 sm:p-5">
+                <div className="mt-0.5 rounded-full p-1.5 sm:mt-1 sm:p-2" style={{ backgroundColor: PALE_GOLD }}>
+                  <CheckCircle2 size={16} style={{ color: GOLD }} className="sm:w-[18px] sm:h-[18px]" />
                 </div>
-                <div className="text-lg font-semibold text-slate-700">{item}</div>
+                <div className="text-sm font-semibold text-slate-700 sm:text-base lg:text-lg">{item}</div>
               </div>
             ))}
           </div>
         </div>
-        <div className="rounded-[2.5rem] p-8 shadow-2xl" style={{ backgroundColor: NAVY }}>
+        <div className="rounded-[2.5rem] p-6 shadow-2xl sm:p-8" style={{ backgroundColor: NAVY }}>
           <div className="rounded-3xl bg-white p-8">
             <div className="flex items-center justify-between">
               <div>
@@ -797,40 +797,40 @@ function ProcessIntakeSection() {
       <div className="relative mx-auto grid max-w-7xl gap-16 px-5 lg:grid-cols-2 lg:items-center">
         <div>
           <Pill>Simple Process</Pill>
-          <h2 className="mt-6 text-5xl font-black leading-tight md:text-6xl" style={{ color: NAVY }}>
+          <h2 className="mt-4 text-3xl font-black leading-tight sm:mt-6 sm:text-4xl lg:text-5xl md:text-6xl" style={{ color: NAVY }}>
             Filing Taxes Shouldn't Feel Complicated.
           </h2>
-          <div className="mt-12 space-y-8">
+          <div className="mt-8 space-y-6 sm:mt-12 lg:space-y-8">
             {processSteps.map((step) => (
-              <div key={step.number} className="flex gap-6">
+              <div key={step.number} className="flex gap-4 sm:gap-6">
                 <div
-                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-2xl font-black text-white shadow-xl"
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-xl font-black text-white shadow-xl sm:h-16 sm:w-16 sm:text-2xl"
                   style={{ backgroundColor: NAVY }}
                 >
                   {step.number}
                 </div>
                 <div>
-                  <div className="text-2xl font-black" style={{ color: NAVY }}>
+                  <div className="text-lg font-black sm:text-2xl" style={{ color: NAVY }}>
                     {step.title}
                   </div>
-                  <p className="mt-2 text-lg leading-8 text-slate-600">{step.text}</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600 sm:mt-2 sm:text-base lg:text-lg lg:leading-8">{step.text}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
-        <div className="rounded-[2.5rem] p-10 shadow-2xl" style={{ backgroundColor: NAVY }}>
-          <div className="rounded-[2rem] bg-white p-8">
-            <div className="mb-8 flex items-center justify-between gap-4">
+        <div className="rounded-[2.5rem] p-6 shadow-2xl sm:p-8 lg:p-10" style={{ backgroundColor: NAVY }}>
+          <div className="rounded-[2rem] bg-white p-6 sm:p-8">
+            <div className="mb-6 flex items-start justify-between gap-3 sm:mb-8">
               <div>
-                <div className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400">
+                <div className="text-xs font-bold uppercase tracking-[0.15em] text-slate-400 sm:text-sm">
                   Start Your Filing
                 </div>
-                <h3 className="mt-2 text-4xl font-black" style={{ color: NAVY }}>
+                <h3 className="mt-1 text-2xl font-black sm:mt-2 sm:text-3xl lg:text-4xl" style={{ color: NAVY }}>
                   Client Intake Portal
                 </h3>
               </div>
-              <Upload size={32} style={{ color: GOLD }} />
+              <Upload size={26} style={{ color: GOLD }} className="sm:w-8 sm:h-8" />
             </div>
             {success ? (
               <div className="flex flex-col items-center py-8 text-center">
@@ -969,11 +969,11 @@ function FinalCta({ onAdminClick }: { onAdminClick: () => void }) {
     <section id="contact" className="py-24">
       <div className="mx-auto max-w-7xl px-5">
         <div
-          className="rounded-[3rem] p-12 text-center text-white shadow-2xl"
+          className="rounded-[2rem] p-6 text-center text-white shadow-2xl sm:rounded-[3rem] sm:p-12"
           style={{ backgroundColor: NAVY }}
         >
-          <h2 className="text-5xl font-black">Ready To Get Started?</h2>
-          <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-slate-200">
+          <h2 className="text-3xl font-black sm:text-4xl lg:text-5xl">Ready To Get Started?</h2>
+          <p className="mx-auto mt-4 max-w-3xl text-base leading-relaxed text-slate-200 sm:mt-5 sm:text-lg lg:text-xl">
             Work with Apex Tax Business Group for a clean, secure, and professional tax filing experience.
           </p>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
