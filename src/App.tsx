@@ -427,6 +427,26 @@ function HeroSection({ onAdminClick }: { onAdminClick: () => void }) {
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,rgba(213,170,68,0.18),transparent_28%)]" />
 
+      {/* Animated floating orbs */}
+      <motion.div
+        animate={{ y: [0, -18, 0], opacity: [0.12, 0.22, 0.12] }}
+        transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute left-[8%] top-[20%] h-32 w-32 rounded-full"
+        style={{ backgroundColor: GOLD, filter: "blur(48px)" }}
+      />
+      <motion.div
+        animate={{ y: [0, 22, 0], opacity: [0.08, 0.16, 0.08] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+        className="absolute right-[15%] top-[55%] h-48 w-48 rounded-full"
+        style={{ backgroundColor: GOLD, filter: "blur(64px)" }}
+      />
+      <motion.div
+        animate={{ y: [0, -14, 0], x: [0, 10, 0], opacity: [0.1, 0.18, 0.1] }}
+        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 2.5 }}
+        className="absolute left-[55%] top-[5%] h-24 w-24 rounded-full"
+        style={{ backgroundColor: GOLD, filter: "blur(40px)" }}
+      />
+
       <div className="relative mx-auto max-w-7xl px-5 py-14 lg:py-16">
         <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
           <motion.div
