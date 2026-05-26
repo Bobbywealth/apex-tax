@@ -202,7 +202,7 @@ function PortalClientCard({ name, subtitle, status }: { name: string; subtitle: 
 
 export default function App() {
   // Initialize view from hash OR sessionStorage (sessionStorage survives page refresh within the same tab)
-  const [view, setView] = useState<"website" | "dashboard" | "upload">(() => {
+  const [view, setView] = useState<"website" | "dashboard" | "upload" | "book">(() => {
     const hash = window.location.hash.replace("#", "");
     if (hash === "dashboard" || hash === "admin" || hash.startsWith("admin-")) return "dashboard";
     // Check sessionStorage for admin session
@@ -221,6 +221,8 @@ export default function App() {
         setView("dashboard");
       } else if (hash === "upload") {
         setView("upload");
+      } else if (hash === "book") {
+        setView("book");
       } else {
         setView("website");
         setTimeout(() => {
@@ -263,6 +265,8 @@ export default function App() {
         <Website onAdminClick={goToDashboard} setView={setView} />
       ) : view === "upload" ? (
         <UploadPage />
+      ) : view === "book" ? (
+        <BookConsultationPage />
       ) : !token ? (
         <AdminLogin onLogin={handleLogin} />
       ) : (
@@ -275,7 +279,7 @@ export default function App() {
 function Header({
   view, isLoggedIn, goToDashboard,
 }: {
-  view: "website" | "dashboard" | "upload";
+  view: "website" | "dashboard" | "upload" | "book";
   isLoggedIn: boolean;
   goToDashboard: () => void;
 }) {
@@ -399,7 +403,7 @@ function Header({
 function Website({ onAdminClick, setView }: { onAdminClick: () => void; setView: (v: "website" | "dashboard") => void }) {
   return (
     <main>
-      <HeroSection onAdminClick={onAdminClick} />
+      <HeroSection />
       <FeaturedImageSection />
       <ServicesSection />
       <TestimonialsSection />
@@ -409,7 +413,7 @@ function Website({ onAdminClick, setView }: { onAdminClick: () => void; setView:
     </main>
   );
 }
-function HeroSection({ onAdminClick }: { onAdminClick: () => void }) {
+function HeroSection() {
   return (
     <section id="home" className="relative overflow-hidden" style={{ backgroundColor: "#06162B" }}>
       <div
@@ -481,10 +485,10 @@ function HeroSection({ onAdminClick }: { onAdminClick: () => void }) {
 
               <button
                 type="button"
-                onClick={onAdminClick}
+                onClick={() => { window.location.hash = '#book'; }}
                 className="rounded-xl border border-[#D5AA44]/70 bg-transparent px-7 py-4 text-center font-black text-white transition hover:bg-white/10"
               >
-                Admin Login
+                Book a Consultation
               </button>
             </div>
 
@@ -1662,6 +1666,131 @@ function UploadPage() {
             className="w-full rounded-2xl py-4 text-lg font-black text-white shadow-xl transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             style={{ backgroundColor: GOLD }}>
             {uploading ? 'Submitting...' : 'Submit Request'}
+          </button>
+          <p className="text-center text-xs text-slate-400 flex items-center justify-center gap-1"><Lock size={10} />Your information is encrypted and never shared.</p>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function BookConsultationPage() {
+  const [form, setForm] = useState({
+    client_name: '', email: '', phone: '', date: '', time: '', notes: '',
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState('');
+
+  const timeSlots = [
+    '9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM',
+    '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM',
+  ];
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.client_name || !form.email || !form.date) return;
+    setSubmitting(true);
+    setError('');
+    try {
+      await api.appointments.create(form);
+      setSubmitted(true);
+    } catch (err: any) {
+      setError(err.message || 'Failed to book. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="flex min-h-screen items-center justify-center px-4" style={{ backgroundColor: LIGHT_BG }}>
+        <div className="w-full max-w-xl rounded-3xl bg-white p-8 shadow-2xl text-center">
+          <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full mx-auto" style={{ backgroundColor: PALE_GOLD }}>
+            <CheckCircle2 size={40} style={{ color: GOLD }} />
+          </div>
+          <h2 className="text-3xl font-black" style={{ color: NAVY }}>Consultation Booked!</h2>
+          <p className="mt-3 text-slate-500">We'll see you on {form.date} at {form.time}. A confirmation will be sent to {form.email}.</p>
+          <button
+            onClick={() => { setSubmitted(false); setForm({ client_name: '', email: '', phone: '', date: '', time: '', notes: '' }); }}
+            className="mt-8 rounded-2xl px-8 py-4 font-black text-white shadow-xl" style={{ backgroundColor: NAVY }}
+          >
+            Book Another
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen py-16 px-4" style={{ backgroundColor: LIGHT_BG }}>
+      <div className="mx-auto max-w-3xl">
+        {/* Header */}
+        <div className="mb-10 text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm mb-4">
+            <Calendar size={14} style={{ color: GOLD }} />Schedule Your Session
+          </div>
+          <h1 className="text-4xl font-black" style={{ color: NAVY }}>Book a Consultation</h1>
+          <p className="mt-3 text-slate-500">Choose a date and time that works for you. We'll confirm your appointment within the hour.</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6 rounded-3xl bg-white p-8 shadow-xl">
+          {/* Personal Info */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Full Name *</label>
+              <input type="text" required placeholder="John Smith" value={form.client_name}
+                onChange={e => setForm({ ...form, client_name: e.target.value })}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-800 placeholder-slate-400 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Email *</label>
+              <input type="email" required placeholder="john@example.com" value={form.email}
+                onChange={e => setForm({ ...form, email: e.target.value })}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-800 placeholder-slate-400 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Phone</label>
+              <input type="tel" placeholder="(555) 123-4567" value={form.phone}
+                onChange={e => setForm({ ...form, phone: e.target.value })}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-800 placeholder-slate-400 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100" />
+            </div>
+          </div>
+
+          {/* Date & Time */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Preferred Date *</label>
+              <input type="date" required value={form.date}
+                onChange={e => setForm({ ...form, date: e.target.value })}
+                min={new Date().toISOString().split('T')[0]}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3.5 text-sm text-slate-700 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100" />
+            </div>
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Preferred Time *</label>
+              <select required value={form.time}
+                onChange={e => setForm({ ...form, time: e.target.value })}
+                className="w-full rounded-xl border border-slate-200 px-4 py-3.5 text-slate-600 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100">
+                <option value="">Select time</option>
+                {timeSlots.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-slate-500">Anything We Should Know?</label>
+            <textarea rows={3} placeholder="e.g. Self-employed, have a small business, need help with 1099..."
+              value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })}
+              className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3.5 text-slate-800 placeholder-slate-400 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100" />
+          </div>
+
+          {error && <div className="rounded-xl bg-red-50 p-4 text-sm text-red-600 flex items-center gap-2"><XCircle size={16} />{error}</div>}
+
+          <button type="submit" disabled={submitting || !form.client_name || !form.email || !form.date || !form.time}
+            className="w-full rounded-2xl py-4 text-lg font-black text-white shadow-xl transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            style={{ backgroundColor: GOLD }}>
+            {submitting ? 'Booking...' : 'Confirm Appointment'}
           </button>
           <p className="text-center text-xs text-slate-400 flex items-center justify-center gap-1"><Lock size={10} />Your information is encrypted and never shared.</p>
         </form>
