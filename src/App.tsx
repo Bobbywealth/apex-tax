@@ -970,9 +970,88 @@ function FinalCta({ onAdminClick }: { onAdminClick: () => void }) {
   );
 }
 // ─── Admin Login ────────────────────────────────────────────────
-function AdminLogin({ onLogin: _onLogin }: { onLogin: (token: string) => void }) {
-  // Admin portal hidden for now. Contact Apex Tax directly for admin access.
-  return null;
+function AdminLogin({ onLogin }: { onLogin: (token: string) => void }) {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!username || !password) { setError("Please enter username and password"); return; }
+    setLoading(true);
+    setError("");
+    try {
+      const res = await api.auth.login(username, password);
+      onLogin(res.token || "");
+    } catch (err: any) {
+      setError(err.message || "Login failed. Check your credentials.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex min-h-[calc(100vh-80px)] items-center justify-center px-4 py-16" style={{ backgroundColor: LIGHT_BG }}>
+      <div className="w-full max-w-md rounded-3xl p-8 shadow-xl" style={{ backgroundColor: "white" }}>
+        <div className="mb-8 flex flex-col items-center text-center">
+          <div className="mb-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl p-2 shadow-lg ring-1 ring-slate-200" style={{ backgroundColor: NAVY }}>
+            <img src={LOGO_URL} alt="Apex Tax" className="h-full w-full object-contain brightness-0 invert" />
+          </div>
+          <h1 className="text-2xl font-black" style={{ color: NAVY }}>Admin Portal</h1>
+          <p className="mt-1 text-sm text-slate-500">Sign in to manage clients and intake</p>
+        </div>
+
+        {error && (
+          <div className="mb-4 flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600">
+            <XCircle size={16} />{error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="mb-1 block text-sm font-semibold text-slate-700">Username</label>
+            <input
+              type="text"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              placeholder="admin@apexbg.com"
+              autoComplete="username"
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+            />
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-semibold text-slate-700">Password</label>
+            <input
+              type="password"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="••••••••"
+              autoComplete="current-password"
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100"
+            />
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full rounded-xl py-3 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl disabled:opacity-50"
+            style={{ backgroundColor: NAVY }}
+          >
+            {loading ? "Signing in…" : "Sign In"}
+          </button>
+        </form>
+
+        <div className="mt-6 border-t border-slate-100 pt-4 text-center">
+          <button
+            onClick={() => window.location.hash = "#home"}
+            className="text-sm text-slate-400 hover:text-slate-600"
+          >
+            ← Back to website
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ─── Admin Dashboard ────────────────────────────────────────────
