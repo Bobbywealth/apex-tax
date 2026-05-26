@@ -792,7 +792,7 @@ function WhyChooseSection() {
   );
 }
 function ProcessIntakeSection() {
-  const [form, setForm] = useState({ full_name: '', email: '', phone: '', tax_type: '', message: '' });
+  const [form, setForm] = useState({ full_name: '', email: '', phone: '', tax_type: '', message: '', preferred_date: '', preferred_time: '' });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -864,12 +864,12 @@ function ProcessIntakeSection() {
                   <CheckCircle2 size={32} style={{ color: GOLD }} />
                 </div>
                 <h4 className="text-2xl font-black" style={{ color: NAVY }}>Request Submitted!</h4>
-                <p className="mt-2 text-slate-500">We'll contact you within 24 hours to get started.</p>
+                <p className="mt-2 text-slate-500">{form.preferred_date ? `Appointment requested for ${form.preferred_date}${form.preferred_time ? ` at ${form.preferred_time}` : ""}. We'll confirm shortly.` : "We'll contact you within 24 hours to get started."}</p>
                 <button
                   type="button"
                   className="mt-6 rounded-2xl px-6 py-3 font-bold text-white"
                   style={{ backgroundColor: NAVY }}
-                  onClick={() => { setSuccess(false); setForm({ full_name: '', email: '', phone: '', tax_type: '', message: '' }); }}
+                  onClick={() => { setSuccess(false); setForm({ full_name: '', email: '', phone: '', tax_type: '', message: '', preferred_date: '', preferred_time: '' }); }}
                 >
                   Submit Another
                 </button>
@@ -909,6 +909,27 @@ function ProcessIntakeSection() {
                   <option value="self-employed">Self-Employed / 1099</option>
                   <option value="both">Both Personal + Self-Employed</option>
                 </select>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-slate-500">Preferred Date</label>
+                    <input type="date" className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm text-slate-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100" value={form.preferred_date} onChange={e => setForm({ ...form, preferred_date: e.target.value })} min={new Date().toISOString().split('T')[0]} />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-slate-500">Preferred Time</label>
+                    <select className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm text-slate-600 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100" value={form.preferred_time} onChange={e => setForm({ ...form, preferred_time: e.target.value })}>
+                      <option value="">Select time</option>
+                      <option value="9:00 AM">9:00 AM</option>
+                      <option value="10:00 AM">10:00 AM</option>
+                      <option value="11:00 AM">11:00 AM</option>
+                      <option value="12:00 PM">12:00 PM</option>
+                      <option value="1:00 PM">1:00 PM</option>
+                      <option value="2:00 PM">2:00 PM</option>
+                      <option value="3:00 PM">3:00 PM</option>
+                      <option value="4:00 PM">4:00 PM</option>
+                      <option value="5:00 PM">5:00 PM</option>
+                    </select>
+                  </div>
+                </div>
                 <textarea
                   placeholder="Anything else we should know?"
                   rows={3}
@@ -1069,6 +1090,8 @@ interface IntakeSubmission {
   phone: string;
   tax_type: string;
   message: string;
+  preferred_date: string;
+  preferred_time: string;
   documents_count: number;
   status: string;
   created_at: string;
@@ -1081,6 +1104,15 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
+  const [activeTab, setActiveTab] = useState<"dashboard" | "clients" | "documents" | "appointments" | "messages">("dashboard");
+  const [docClientId, setDocClientId] = useState("");
+  const [docFile, setDocFile] = useState<File | null>(null);
+  const [docUploading, setDocUploading] = useState<string | false>(false);
+  const [docList, setDocList] = useState<any[]>([]);
+  const [docsLoading, setDocsLoading] = useState(false);
+  const [docError, setDocError] = useState("");
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [appointmentsLoading, setAppointmentsLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -1134,6 +1166,44 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     }
   };
 
+  const handleDocUpload = async () => {
+    if (!docFile || !docClientId) return;
+    setDocUploading(docFile.name);
+    setDocError("");
+    try {
+      await api.documents.upload(docClientId, docFile);
+      setDocFile(null);
+      await fetchDocs(docClientId);
+      showToast("Document uploaded!");
+    } catch (err: any) {
+      setDocError(err.message || "Upload failed");
+    } finally {
+      setDocUploading(false);
+    }
+  };
+
+  const fetchDocs = async (clientId?: string) => {
+    setDocsLoading(true);
+    setDocError("");
+    try {
+      const docs = await api.documents.list(clientId);
+      setDocList(docs || []);
+    } catch {
+      setDocList([]);
+    } finally {
+      setDocsLoading(false);
+    }
+  };
+
+  useEffect(() => { if (activeTab === "documents") fetchDocs(docClientId || undefined); }, [activeTab, docClientId]);
+
+  useEffect(() => {
+    if (activeTab === "appointments") {
+      setAppointmentsLoading(true);
+      api.appointments.list().then(data => { setAppointments(data || []); setAppointmentsLoading(false); }).catch(() => { setAppointments([]); setAppointmentsLoading(false); });
+    }
+  }, [activeTab]);
+
   const STATUS_OPTIONS = ["Pending", "Contacted", "Intake Review", "Client Created", "Rejected"];
 
   const statusColor: Record<string, string> = {
@@ -1160,17 +1230,21 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           <span>Admin Portal</span>
         </div>
         {[
-          { icon: BarChart3, label: "Dashboard", active: true },
-          { icon: Users, label: "Clients" },
-          { icon: Upload, label: "Documents" },
-          { icon: Calendar, label: "Appointments" },
-          { icon: Mail, label: "Messages" },
+          { icon: BarChart3, label: "Dashboard", key: "dashboard" as const },
+          { icon: Users, label: "Clients", key: "clients" as const },
+          { icon: Upload, label: "Documents", key: "documents" as const },
+          { icon: Calendar, label: "Appointments", key: "appointments" as const },
+          { icon: Mail, label: "Messages", key: "messages" as const },
         ].map((item) => {
           const Icon = item.icon;
           return (
-            <div className={`mb-2 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold ${item.active ? "bg-white/20" : "hover:bg-white/10"}`} key={item.label}>
+            <button
+              onClick={() => setActiveTab(item.key)}
+              className={`mb-1.5 flex w-full items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition ${activeTab === item.key ? "bg-white/20" : "hover:bg-white/10"}`}
+              key={item.key}
+            >
               <Icon size={18} /><span>{item.label}</span>
-            </div>
+            </button>
           );
         })}
         <div className="mt-6 border-t border-white/20 pt-4">
@@ -1181,114 +1255,259 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       </aside>
 
       <main>
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-3xl font-black" style={{ color: NAVY }}>Dashboard</h2>
-            <p className="text-slate-500">{loading ? "Loading…" : "Real-time client overview"}</p>
-          </div>
-          <button onClick={fetchData} disabled={loading}
-            className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm hover:bg-slate-50 disabled:opacity-50">
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />Refresh
-          </button>
-        </div>
-
-        {error && (
-          <div className="mb-4 flex items-center gap-3 rounded-2xl bg-red-50 p-4 text-sm text-red-600">
-            <XCircle size={18} />{error}
-            <button onClick={fetchData} className="ml-auto font-bold underline">Retry</button>
-          </div>
-        )}
-
-        {toast && (
-          <div className={`mb-4 flex items-center gap-3 rounded-2xl p-4 text-sm ${toast.ok ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"}`}>
-            {toast.ok ? <CheckCircle2 size={18} /> : <XCircle size={18} />}
-            {toast.msg}
-          </div>
-        )}
-
-        {data && (
-          <div className="grid gap-4 md:grid-cols-4">
-            <Stat icon={Users} label="Total Clients" value={data.totalClients ?? 0} />
-            <Stat icon={FileText} label="In Progress" value={data.inProgress ?? 0} />
-            <Stat icon={CheckCircle2} label="Filed" value={data.filed ?? 0} />
-            <Stat icon={Upload} label="Pending Intake" value={data.pendingIntake ?? 0} />
-          </div>
-        )}
-
-        <div className="mt-6 rounded-3xl bg-white p-5 shadow-sm">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-xl font-black" style={{ color: NAVY }}>Intake Submissions</h3>
-            <span className="rounded-full px-3 py-1 text-xs font-bold text-white" style={{ backgroundColor: GOLD }}>{submissions.length}</span>
-          </div>
-
-          {loading && submissions.length === 0 ? (
-            <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="h-16 animate-pulse rounded-2xl bg-slate-100" />)}</div>
-          ) : submissions.length === 0 ? (
-            <div className="py-12 text-center text-slate-400">
-              <ClipboardList size={40} className="mx-auto mb-3 opacity-30" />
-              <p className="font-semibold">No submissions yet</p>
-              <p className="text-sm">New client intakes appear here</p>
+        {activeTab === "dashboard" && (
+          <>
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 className="text-3xl font-black" style={{ color: NAVY }}>Dashboard</h2>
+                <p className="text-slate-500">{loading ? "Loading…" : "Real-time client overview"}</p>
+              </div>
+              <button onClick={fetchData} disabled={loading}
+                className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-600 shadow-sm hover:bg-slate-50 disabled:opacity-50">
+                <RefreshCw size={16} className={loading ? "animate-spin" : ""} />Refresh
+              </button>
             </div>
-          ) : (
-            <div className="overflow-hidden rounded-2xl border">
-              <table className="w-full text-left text-sm">
-                <thead style={{ backgroundColor: NAVY, color: "white" }}>
-                  <tr>
-                    <th className="p-4 font-semibold">Client</th>
-                    <th className="p-4 font-semibold">Contact</th>
-                    <th className="p-4 font-semibold">Tax Type</th>
-                    <th className="p-4 font-semibold">Status</th>
-                    <th className="p-4 font-semibold">Date</th>
-                    <th className="p-4 font-semibold">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {submissions.map((s) => (
-                    <tr className="border-b last:border-0 hover:bg-slate-50" key={s.id}>
-                      <td className="p-4">
-                        <div className="font-bold" style={{ color: NAVY }}>{s.full_name}</div>
-                        {s.message && <div className="mt-1 max-w-xs truncate text-xs text-slate-400">{s.message}</div>}
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2 text-slate-600"><Mail size={14} /><span className="text-xs">{s.email}</span></div>
-                        <div className="mt-1 flex items-center gap-2 text-slate-600"><Phone size={14} /><span className="text-xs">{s.phone}</span></div>
-                      </td>
-                      <td className="p-4"><span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold capitalize">{s.tax_type?.replace("-", " ")}</span></td>
-                      <td className="p-4"><span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusClass(s.status)}`}>{s.status}</span></td>
-                      <td className="p-4 text-xs text-slate-400">{formatDate(s.created_at)}</td>
-                      <td className="p-4">
-                        {s.status !== "Client Created" && s.status !== "Rejected" && (
-                          <div className="flex flex-col gap-2">
-                            <button
-                              onClick={() => handleConvert(s.id)}
-                              disabled={actionLoading === s.id}
-                              className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-600 disabled:opacity-50"
-                            >
-                              {actionLoading === s.id ? "…" : "Create Client"}
-                            </button>
-                            <select
-                              value={s.status}
-                              onChange={e => handleStatusChange(s.id, e.target.value)}
-                              disabled={actionLoading === s.id}
-                              className="rounded-lg border border-slate-200 px-2 py-1.5 text-xs disabled:opacity-50"
-                            >
-                              {STATUS_OPTIONS.filter(o => o !== s.status).map(o => (
-                                <option key={o} value={o}>{o}</option>
-                              ))}
-                            </select>
+
+            {error && (
+              <div className="mb-4 flex items-center gap-3 rounded-2xl bg-red-50 p-4 text-sm text-red-600">
+                <XCircle size={18} />{error}
+                <button onClick={fetchData} className="ml-auto font-bold underline">Retry</button>
+              </div>
+            )}
+
+            {toast && (
+              <div className={`mb-4 flex items-center gap-3 rounded-2xl p-4 text-sm ${toast.ok ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"}`}>
+                {toast.ok ? <CheckCircle2 size={18} /> : <XCircle size={18} />}
+                {toast.msg}
+              </div>
+            )}
+
+            {data && (
+              <div className="grid gap-4 md:grid-cols-4">
+                <Stat icon={Users} label="Total Clients" value={data.totalClients ?? 0} />
+                <Stat icon={FileText} label="In Progress" value={data.inProgress ?? 0} />
+                <Stat icon={CheckCircle2} label="Filed" value={data.filed ?? 0} />
+                <Stat icon={Upload} label="Pending Intake" value={data.pendingIntake ?? 0} />
+              </div>
+            )}
+
+            <div className="mt-6 rounded-3xl bg-white p-5 shadow-sm">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-xl font-black" style={{ color: NAVY }}>Intake Submissions</h3>
+                <span className="rounded-full px-3 py-1 text-xs font-bold text-white" style={{ backgroundColor: GOLD }}>{submissions.length}</span>
+              </div>
+
+              {loading && submissions.length === 0 ? (
+                <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="h-16 animate-pulse rounded-2xl bg-slate-100" />)}</div>
+              ) : submissions.length === 0 ? (
+                <div className="py-12 text-center text-slate-400">
+                  <ClipboardList size={40} className="mx-auto mb-3 opacity-30" />
+                  <p className="font-semibold">No submissions yet</p>
+                  <p className="text-sm">New client intakes appear here</p>
+                </div>
+              ) : (
+                <div className="overflow-hidden rounded-2xl border">
+                  <table className="w-full text-left text-sm">
+                    <thead style={{ backgroundColor: NAVY, color: "white" }}>
+                      <tr>
+                        <th className="p-4 font-semibold">Client</th>
+                        <th className="p-4 font-semibold">Contact</th>
+                        <th className="p-4 font-semibold">Tax Type</th>
+                        <th className="p-4 font-semibold">Status</th>
+                        <th className="p-4 font-semibold">Date</th>
+                        <th className="p-4 font-semibold">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {submissions.map((s) => (
+                        <tr className="border-b last:border-0 hover:bg-slate-50" key={s.id}>
+                          <td className="p-4">
+                            <div className="font-bold" style={{ color: NAVY }}>{s.full_name}</div>
+                            {s.message && <div className="mt-1 max-w-xs truncate text-xs text-slate-400">{s.message}</div>}
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-2 text-slate-600"><Mail size={14} /><span className="text-xs">{s.email}</span></div>
+                            <div className="mt-1 flex items-center gap-2 text-slate-600"><Phone size={14} /><span className="text-xs">{s.phone}</span></div>
+                          </td>
+                          <td className="p-4"><span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold capitalize">{s.tax_type?.replace("-", " ")}</span></td>
+                          <td className="p-4"><span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusClass(s.status)}`}>{s.status}</span></td>
+                          <td className="p-4 text-xs text-slate-400">{formatDate(s.created_at)}</td>
+                          <td className="p-4">
+                            {s.status !== "Client Created" && s.status !== "Rejected" && (
+                              <div className="flex flex-col gap-2">
+                                <button
+                                  onClick={() => handleConvert(s.id)}
+                                  disabled={actionLoading === s.id}
+                                  className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-600 disabled:opacity-50"
+                                >
+                                  {actionLoading === s.id ? "…" : "Create Client"}
+                                </button>
+                                <select
+                                  value={s.status}
+                                  onChange={e => handleStatusChange(s.id, e.target.value)}
+                                  disabled={actionLoading === s.id}
+                                  className="rounded-lg border border-slate-200 px-2 py-1.5 text-xs disabled:opacity-50"
+                                >
+                                  {STATUS_OPTIONS.filter(o => o !== s.status).map(o => (
+                                    <option key={o} value={o}>{o}</option>
+                                  ))}
+                                </select>
+                              </div>
+                            )}
+                            {(s.status === "Client Created" || s.status === "Rejected") && (
+                              <span className="text-xs text-slate-400">{s.status}</span>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {activeTab === "clients" && (
+          <>
+            <div className="mb-6">
+              <h2 className="text-3xl font-black" style={{ color: NAVY }}>Clients</h2>
+              <p className="text-slate-500">Clients converted from intake will appear here</p>
+            </div>
+            <div className="rounded-3xl bg-white p-5 shadow-sm">
+              <p className="py-12 text-center text-slate-400">Clients converted from intake will appear here.</p>
+            </div>
+          </>
+        )}
+
+        {activeTab === "documents" && (
+          <>
+            <div className="mb-6">
+              <h2 className="text-3xl font-black" style={{ color: NAVY }}>Documents</h2>
+              <p className="text-slate-500">Upload documents and assign them to a client</p>
+            </div>
+            <div className="mb-4 grid gap-4 lg:grid-cols-2">
+              <div className="rounded-2xl bg-white p-4 shadow-sm">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">Upload To Client</label>
+                <select className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100" value={docClientId} onChange={e => setDocClientId(e.target.value)}>
+                  <option value="">Select a client…</option>
+                  {submissions.map(s => <option key={s.id} value={s.id}>{s.full_name} — {s.email}</option>)}
+                </select>
+              </div>
+              <div className="relative rounded-2xl bg-white p-4 shadow-sm">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">Upload Document</label>
+                <div className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-5 text-center transition-colors ${docUploading ? "border-amber-400 bg-amber-50" : "border-slate-200 hover:border-amber-400 hover:bg-slate-50"}`}>
+                  {docUploading ? (
+                    <div className="flex items-center gap-2 text-sm text-amber-600"><RefreshCw size={16} className="animate-spin" /><span>Uploading {docUploading}…</span></div>
+                  ) : docFile ? (
+                    <div className="flex items-center gap-2"><FileText size={20} style={{ color: GOLD }} /><span className="text-sm font-semibold text-slate-700">{docFile.name}</span><button onClick={() => setDocFile(null)} className="ml-2 text-slate-400 hover:text-red-500"><XCircle size={16} /></button></div>
+                  ) : (
+                    <><Upload size={20} className="mb-2 text-slate-400" /><span className="text-xs text-slate-500">Click to select file</span><input type="file" className="absolute inset-0 cursor-pointer opacity-0" style={{ zIndex: 1 }} onChange={e => { const f = e.target.files?.[0]; if (f) setDocFile(f); }} accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" /></>
+                  )}
+                </div>
+                {docFile && (
+                  <button onClick={handleDocUpload} disabled={!docClientId || !!docUploading} className="mt-3 w-full rounded-xl py-2.5 text-sm font-bold text-white shadow transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50" style={{ backgroundColor: docClientId ? NAVY : "#999" }}>
+                    {docUploading ? "Uploading…" : docClientId ? "Upload Document" : "Select a client first"}
+                  </button>
+                )}
+                {docError && <p className="mt-2 text-xs text-red-500">{docError}</p>}
+              </div>
+            </div>
+            <div className="rounded-2xl bg-white p-4 shadow-sm">
+              <h3 className="mb-3 text-base font-bold" style={{ color: NAVY }}>{docClientId ? `Documents — ${submissions.find(s => s.id === docClientId)?.full_name}` : "All Client Documents"}</h3>
+              {docsLoading ? <div className="space-y-2">{[...Array(3)].map((_, i) => <div key={i} className="h-12 animate-pulse rounded-xl bg-slate-100" />)}</div> : docList.length === 0 ? (
+                <div className="py-8 text-center text-slate-400"><FileText size={28} className="mx-auto mb-2 opacity-30" /><p className="text-xs font-semibold">No documents found</p></div>
+              ) : (
+                <table className="w-full text-left text-xs">
+                  <thead style={{ backgroundColor: NAVY, color: "white" }}><tr><th className="p-2.5">File Name</th><th className="p-2.5">Client</th><th className="p-2.5">Uploaded</th></tr></thead>
+                  <tbody>{docList.map((doc: any) => <tr key={doc.id} className="border-b border-slate-100 last:border-0"><td className="p-2.5 font-semibold">{doc.filename || doc.name}</td><td className="p-2.5 text-slate-600">{doc.client_name || "—"}</td><td className="p-2.5 text-slate-400">{formatDate(doc.created_at)}</td></tr>)}</tbody>
+                </table>
+              )}
+            </div>
+          </>
+        )}
+
+        {activeTab === "appointments" && (
+          <>
+            <div className="mb-6">
+              <h2 className="text-3xl font-black" style={{ color: NAVY }}>Appointments</h2>
+              <p className="text-slate-500">Appointment requests from intake form</p>
+            </div>
+            <div className="mb-4 grid grid-cols-3 gap-3">
+              {[{ label: "Pending", value: appointments.filter(a => a.status === "Pending" || !a.status).length, color: "bg-amber-50 text-amber-700 border-amber-100" }, { label: "Confirmed", value: appointments.filter(a => a.status === "Confirmed").length, color: "bg-emerald-50 text-emerald-700 border-emerald-100" }, { label: "Completed", value: appointments.filter(a => a.status === "Completed" || a.status === "Done").length, color: "bg-blue-50 text-blue-700 border-blue-100" }].map(stat => (
+                <div key={stat.label} className={`rounded-xl border p-3 text-center ${stat.color}`}><div className="text-2xl font-black">{stat.value}</div><div className="text-[10px] font-semibold uppercase">{stat.label}</div></div>
+              ))}
+            </div>
+            {appointmentsLoading ? <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="h-20 animate-pulse rounded-2xl bg-slate-100" />)}</div> : appointments.length === 0 ? (
+              <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 text-center shadow-sm"><Calendar size={28} style={{ color: GOLD }} className="mx-auto mb-3" /><h3 className="text-base font-bold" style={{ color: NAVY }}>No appointments yet</h3><p className="mt-1 text-xs text-slate-500">Clients who requested appointments via the intake form will appear here.</p></div>
+            ) : (
+              <div className="space-y-3">
+                {appointments.map((apt: any) => {
+                  const aptStatus = apt.status || "Pending";
+                  const statusColors: Record<string, string> = { Pending: "bg-amber-100 text-amber-700", Confirmed: "bg-emerald-100 text-emerald-700", Completed: "bg-blue-100 text-blue-700", Cancelled: "bg-red-100 text-red-700" };
+                  return (
+                    <div key={apt.id} className="rounded-2xl bg-white p-4 shadow-sm">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex min-w-0 flex-col gap-1.5">
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-black text-white" style={{ backgroundColor: NAVY }}>{apt.client_name?.charAt(0) || "?"}</div>
+                            <div><span className="font-bold" style={{ color: NAVY }}>{apt.client_name}</span><div className="flex gap-x-3 text-[10px] text-slate-400"><span>{apt.email}</span>{apt.phone && <span>{apt.phone}</span>}</div></div>
                           </div>
-                        )}
-                        {(s.status === "Client Created" || s.status === "Rejected") && (
-                          <span className="text-xs text-slate-400">{s.status}</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+                          <div className="ml-11 flex items-center gap-2 text-xs text-slate-600">
+                            {apt.date && <span className="flex items-center gap-1 font-semibold"><Calendar size={12} style={{ color: GOLD }} />{apt.date}{apt.time ? ` at ${apt.time}` : ""}</span>}
+                            {apt.notes && <span className="text-slate-400">— {apt.notes}</span>}
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold ${statusColors[aptStatus] || "bg-slate-100 text-slate-600"}`}>{aptStatus}</span>
+                          {aptStatus === "Pending" && (
+                            <div className="flex gap-1">
+                              <button onClick={async () => { try { await api.appointments.updateStatus(apt.id, "Confirmed"); setAppointments(prev => prev.map(a => a.id === apt.id ? { ...a, status: "Confirmed" } : a)); showToast("Appointment confirmed!"); } catch (e: any) { showToast(e.message, false); } }} className="rounded-lg bg-emerald-100 px-2 py-1 text-[10px] font-bold text-emerald-700 hover:bg-emerald-200">Confirm</button>
+                              <button onClick={async () => { try { await api.appointments.updateStatus(apt.id, "Cancelled"); setAppointments(prev => prev.map(a => a.id === apt.id ? { ...a, status: "Cancelled" } : a)); showToast("Appointment cancelled"); } catch (e: any) { showToast(e.message, false); } }} className="rounded-lg bg-red-100 px-2 py-1 text-[10px] font-bold text-red-700 hover:bg-red-200">Cancel</button>
+                            </div>
+                          )}
+                          {aptStatus === "Confirmed" && (
+                            <button onClick={async () => { try { await api.appointments.updateStatus(apt.id, "Completed"); setAppointments(prev => prev.map(a => a.id === apt.id ? { ...a, status: "Completed" } : a)); showToast("Marked as done!"); } catch (e: any) { showToast(e.message, false); } }} className="rounded-lg bg-blue-100 px-2 py-1 text-[10px] font-bold text-blue-700 hover:bg-blue-200">Mark Done</button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
+
+        {activeTab === "messages" && (
+          <>
+            <div className="mb-6">
+              <h2 className="text-3xl font-black" style={{ color: NAVY }}>Messages</h2>
+              <p className="text-slate-500">Messages from intake form submissions</p>
             </div>
-          )}
-        </div>
+            {submissions.filter(s => s.message).length === 0 ? (
+              <div className="rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 text-center shadow-sm"><Mail size={28} style={{ color: GOLD }} className="mx-auto mb-3" /><h3 className="text-base font-bold" style={{ color: NAVY }}>No messages yet</h3><p className="mt-1 text-xs text-slate-500">Messages from clients who submitted the intake form will appear here.</p></div>
+            ) : (
+              <div className="space-y-3">
+                {submissions.filter(s => s.message).map(s => (
+                  <div key={s.id} className="rounded-2xl bg-white p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-black text-white" style={{ backgroundColor: NAVY }}>{s.full_name.charAt(0)}</div>
+                          <div><span className="font-bold" style={{ color: NAVY }}>{s.full_name}</span><span className="ml-2 text-[10px] text-slate-400">{s.email}</span></div>
+                        </div>
+                        <p className="ml-10 text-sm text-slate-600">{s.message}</p>
+                        {s.preferred_date && <div className="ml-10 flex items-center gap-1 text-[10px] text-slate-400"><Calendar size={10} />Requested: {s.preferred_date}{s.preferred_time ? ` at ${s.preferred_time}` : ""}</div>}
+                      </div>
+                      <span className="shrink-0 text-[10px] text-slate-400">{formatDate(s.created_at)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
       </main>
     </div>
   );
