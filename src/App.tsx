@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { api } from "./services/api";
 import { motion } from "framer-motion";
 import {
   BarChart3,
@@ -646,6 +647,26 @@ function WhyChooseSection() {
   );
 }
 function ProcessIntakeSection() {
+  const [form, setForm] = useState({ full_name: '', email: '', phone: '', tax_type: '', message: '' });
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.full_name || !form.email) return;
+    setLoading(true);
+    setError('');
+    try {
+      await api.intake.submit(form);
+      setSuccess(true);
+    } catch (err: any) {
+      setError(err.message || 'Submission failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section id="upload" className="relative overflow-hidden py-28">
       <div
@@ -692,29 +713,76 @@ function ProcessIntakeSection() {
               </div>
               <Upload size={32} style={{ color: GOLD }} />
             </div>
-            <div className="grid gap-4">
-              {[
-                "Full Name",
-                "Email Address",
-                "Phone Number",
-                "Tax Service Needed",
-                "Upload Tax Documents",
-              ].map((field) => (
-                <div
-                  key={field}
-                  className="rounded-2xl border bg-slate-50 px-5 py-5 text-slate-500 shadow-sm"
-                >
-                  {field}
+            {success ? (
+              <div className="flex flex-col items-center py-8 text-center">
+                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: PALE_GOLD }}>
+                  <CheckCircle2 size={32} style={{ color: GOLD }} />
                 </div>
-              ))}
-              <button
-                type="button"
-                className="mt-4 rounded-2xl py-5 text-lg font-black text-white shadow-xl"
-                style={{ backgroundColor: GOLD }}
-              >
-                Submit Secure Request
-              </button>
-            </div>
+                <h4 className="text-2xl font-black" style={{ color: NAVY }}>Request Submitted!</h4>
+                <p className="mt-2 text-slate-500">We'll contact you within 24 hours to get started.</p>
+                <button
+                  type="button"
+                  className="mt-6 rounded-2xl px-6 py-3 font-bold text-white"
+                  style={{ backgroundColor: NAVY }}
+                  onClick={() => { setSuccess(false); setForm({ full_name: '', email: '', phone: '', tax_type: '', message: '' }); }}
+                >
+                  Submit Another
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="grid gap-4">
+                <input
+                  type="text"
+                  required
+                  placeholder="Full Name *"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-4 text-slate-800 placeholder-slate-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
+                  value={form.full_name}
+                  onChange={(e) => setForm({ ...form, full_name: e.target.value })}
+                />
+                <input
+                  type="email"
+                  required
+                  placeholder="Email Address *"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-4 text-slate-800 placeholder-slate-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                />
+                <input
+                  type="tel"
+                  placeholder="Phone Number"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-4 text-slate-800 placeholder-slate-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
+                <select
+                  className="w-full rounded-xl border border-slate-200 px-4 py-4 text-slate-500 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
+                  value={form.tax_type}
+                  onChange={(e) => setForm({ ...form, tax_type: e.target.value })}
+                >
+                  <option value="">Tax Service Needed</option>
+                  <option value="personal">Personal Tax Filing (W-2)</option>
+                  <option value="self-employed">Self-Employed / 1099</option>
+                  <option value="both">Both Personal + Self-Employed</option>
+                </select>
+                <textarea
+                  placeholder="Anything else we should know?"
+                  rows={3}
+                  className="w-full resize-none rounded-xl border border-slate-200 px-4 py-4 text-slate-800 placeholder-slate-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
+                  value={form.message}
+                  onChange={(e) => setForm({ ...form, message: e.target.value })}
+                />
+                {error && <p className="text-sm text-red-500">{error}</p>}
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="mt-2 rounded-2xl py-4 text-lg font-black text-white shadow-xl transition hover:opacity-90 disabled:opacity-60"
+                  style={{ backgroundColor: GOLD }}
+                >
+                  {loading ? 'Submitting...' : 'Submit Secure Request'}
+                </button>
+                <p className="text-center text-xs text-slate-400">Your info is encrypted and never shared.</p>
+              </form>
+            )}
           </div>
         </div>
       </div>
