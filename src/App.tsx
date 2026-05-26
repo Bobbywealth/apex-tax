@@ -452,7 +452,7 @@ function HeroSection({ onAdminClick }: { onAdminClick: () => void }) {
             <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
               <button
                 type="button"
-                onClick={() => document.getElementById('upload')?.scrollIntoView({ behavior: 'smooth' })}
+                onClick={() => { window.location.hash = '#upload'; }}
                 className="rounded-xl px-7 py-4 text-center font-black text-slate-950 shadow-2xl transition hover:scale-105"
                 style={{ backgroundColor: GOLD }}
               >
@@ -826,7 +826,7 @@ function FinalCta({ onAdminClick }: { onAdminClick: () => void }) {
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
             <button
               type="button"
-              onClick={() => document.getElementById('upload')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() => { window.location.hash = '#upload'; }}
               className="rounded-2xl px-8 py-4 text-center font-black text-slate-950 shadow-lg transition hover:opacity-90"
               style={{ backgroundColor: GOLD }}
             >
