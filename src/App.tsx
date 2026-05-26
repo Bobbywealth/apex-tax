@@ -646,9 +646,8 @@ function FeaturedImageSection() {
 
 function ServicesSection() {
   return (
-    <section id="services" className="relative overflow-hidden py-24">
-      <div
-        className="absolute inset-0 opacity-5"
+    <section id="services" className="relative overflow-hidden py-24" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #FFFDF5 100%)' }}>
+      <div className="absolute inset-0 opacity-5"
         style={{
           backgroundImage: `linear-gradient(${NAVY} 1px, transparent 1px), linear-gradient(90deg, ${NAVY} 1px, transparent 1px)`,
           backgroundSize: "40px 40px",
@@ -753,7 +752,19 @@ function WhyChooseSection() {
     "Modern CRM dashboard and document storage",
   ];
   return (
-    <section id="why" className="bg-white py-24">
+    <section id="why" className="relative overflow-hidden py-24" style={{ background: 'linear-gradient(180deg, #FFFDF5 0%, #ffffff 40%, #F8EBC9 100%)' }}>
+      <motion.div
+        animate={{ y: [0, -12, 0], opacity: [0.06, 0.12, 0.06] }}
+        transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute left-[5%] top-[30%] h-40 w-40 rounded-full"
+        style={{ backgroundColor: GOLD, filter: "blur(60px)" }}
+      />
+      <motion.div
+        animate={{ y: [0, 16, 0], opacity: [0.05, 0.1, 0.05] }}
+        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        className="absolute right-[8%] bottom-[20%] h-52 w-52 rounded-full"
+        style={{ backgroundColor: NAVY, filter: "blur(70px)" }}
+      />
       <div className="mx-auto grid max-w-7xl gap-16 px-5 md:grid-cols-2 md:items-center">
         <div>
           <Pill>Why Choose Apex</Pill>
