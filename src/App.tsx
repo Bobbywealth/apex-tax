@@ -1091,6 +1091,12 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"dashboard" | "clients" | "documents" | "appointments" | "messages">("dashboard");
+  const [docClientId, setDocClientId] = useState("");
+  const [docFile, setDocFile] = useState<File | null>(null);
+  const [docUploading, setDocUploading] = useState<string | false>(false);
+  const [docList, setDocList] = useState<any[]>([]);
+  const [docsLoading, setDocsLoading] = useState(false);
+  const [docError, setDocError] = useState("");
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -1125,6 +1131,44 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
     try { return new Date(d).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }); }
     catch { return d; }
   };
+
+  const handleDocUpload = async () => {
+    if (!docFile || !docClientId) return;
+    setDocUploading(docFile.name);
+    setDocError("");
+    try {
+      await api.documents.upload(docClientId, docFile);
+      setDocFile(null);
+      // Refresh doc list
+      await fetchDocs(docClientId);
+    } catch (err: any) {
+      setDocError(err.message || "Upload failed");
+    } finally {
+      setDocUploading(false);
+    }
+  };
+
+  const fetchDocs = async (clientId?: string) => {
+    setDocsLoading(true);
+    setDocError("");
+    try {
+      const docs = await api.documents.list(clientId);
+      setDocList(docs || []);
+    } catch (err: any) {
+      setDocError(err.message || "Failed to load documents");
+      // Fallback to demo data
+      setDocList([]);
+    } finally {
+      setDocsLoading(false);
+    }
+  };
+
+  // Fetch docs when switching to documents tab or changing client
+  useEffect(() => {
+    if (activeTab === "documents") {
+      fetchDocs(docClientId || undefined);
+    }
+  }, [activeTab, docClientId]);
 
   const navItems: { icon: any; label: string; key: typeof activeTab }[] = [
     { icon: BarChart3, label: "Dashboard", key: "dashboard" },
@@ -1279,14 +1323,112 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           <>
             <div className="mb-5 lg:mb-6">
               <h2 className="text-xl font-black lg:text-3xl" style={{ color: NAVY }}>Documents</h2>
-              <p className="text-xs text-slate-500 lg:text-sm">Secure document storage and management</p>
+              <p className="text-xs text-slate-500 lg:text-sm">Upload documents and assign them to a client</p>
             </div>
-            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 text-center shadow-sm">
-              <div className="mb-3 rounded-2xl p-4" style={{ backgroundColor: PALE_GOLD }}>
-                <Upload size={28} style={{ color: GOLD }} />
+
+            {/* Client selector + upload area */}
+            <div className="mb-4 grid gap-4 lg:grid-cols-2">
+              {/* Select client */}
+              <div className="rounded-2xl bg-white p-4 shadow-sm">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">Upload To Client</label>
+                <select
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:border-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-100"
+                  value={docClientId}
+                  onChange={e => setDocClientId(e.target.value)}
+                >
+                  <option value="">Select a client…</option>
+                  {submissions.map(s => (
+                    <option key={s.id} value={s.id}>{s.full_name} — {s.email}</option>
+                  ))}
+                </select>
               </div>
-              <h3 className="text-base font-bold" style={{ color: NAVY }}>No documents uploaded</h3>
-              <p className="mt-1 max-w-xs text-xs text-slate-500">Documents uploaded by clients via the intake portal will appear here.</p>
+
+              {/* Upload zone */}
+              <div className="rounded-2xl bg-white p-4 shadow-sm">
+                <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">Upload Document</label>
+                <div
+                  className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-5 text-center transition-colors ${docUploading ? "border-amber-400 bg-amber-50" : "border-slate-200 hover:border-amber-400 hover:bg-slate-50"}`}
+                >
+                  {docUploading ? (
+                    <div className="flex items-center gap-2 text-sm text-amber-600">
+                      <RefreshCw size={16} className="animate-spin" />
+                      <span>Uploading {docUploading}…</span>
+                    </div>
+                  ) : docFile ? (
+                    <div className="flex items-center gap-2">
+                      <FileText size={20} style={{ color: GOLD }} />
+                      <span className="text-sm font-semibold text-slate-700">{docFile.name}</span>
+                      <button onClick={() => setDocFile(null)} className="ml-2 text-slate-400 hover:text-red-500"><XCircle size={16} /></button>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload size={20} className="mb-2 text-slate-400" />
+                      <span className="text-xs text-slate-500">Click to select or drag file here</span>
+                      <input
+                        type="file"
+                        className="absolute inset-0 cursor-pointer opacity-0"
+                        onChange={e => { const f = e.target.files?.[0]; if (f) setDocFile(f); }}
+                        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+                      />
+                    </>
+                  )}
+                </div>
+                {docFile && (
+                  <button
+                    onClick={handleDocUpload}
+                    disabled={!docClientId || !!docUploading}
+                    className="mt-3 w-full rounded-xl py-2.5 text-sm font-bold text-white shadow transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                    style={{ backgroundColor: docClientId ? NAVY : "#999" }}
+                  >
+                    {docUploading ? "Uploading…" : docClientId ? "Upload Document" : "Select a client first"}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Documents list */}
+            <div className="rounded-2xl bg-white p-4 shadow-sm lg:p-5">
+              <h3 className="mb-3 text-base font-black lg:text-lg" style={{ color: NAVY }}>
+                {docClientId ? `Documents — ${submissions.find(s => s.id === docClientId)?.full_name}` : "All Client Documents"}
+              </h3>
+              {docsLoading ? (
+                <div className="space-y-2">{[...Array(3)].map((_, i) => <div key={i} className="h-12 animate-pulse rounded-xl bg-slate-100" />)}</div>
+              ) : docError ? (
+                <div className="rounded-xl bg-red-50 p-3 text-xs text-red-600">{docError}</div>
+              ) : docList.length === 0 ? (
+                <div className="py-8 text-center text-slate-400">
+                  <FileText size={28} className="mx-auto mb-2 opacity-30" />
+                  <p className="text-xs font-semibold">No documents found</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-[11px] lg:text-sm">
+                    <thead style={{ backgroundColor: NAVY, color: "white" }}>
+                      <tr>
+                        <th className="p-2.5 font-semibold lg:p-4">File Name</th>
+                        <th className="p-2.5 font-semibold lg:p-4">Client</th>
+                        <th className="p-2.5 font-semibold lg:p-4">Type</th>
+                        <th className="p-2.5 font-semibold lg:p-4">Uploaded</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {docList.map((doc: any) => (
+                        <tr key={doc.id} className="border-b border-slate-100 last:border-0 hover:bg-slate-50">
+                          <td className="p-2.5 lg:p-4">
+                            <div className="flex items-center gap-2">
+                              <FileText size={14} style={{ color: GOLD }} className="shrink-0" />
+                              <span className="font-semibold">{doc.filename || doc.name}</span>
+                            </div>
+                          </td>
+                          <td className="p-2.5 text-slate-600 lg:p-4">{doc.client_name || "—"}</td>
+                          <td className="p-2.5 lg:p-4"><span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold capitalize lg:text-xs">{doc.type || "document"}</span></td>
+                          <td className="p-2.5 text-slate-400 lg:p-4">{formatDate(doc.created_at)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </>
         )}

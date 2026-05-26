@@ -69,4 +69,24 @@ export const api = {
   admin: {
     stats: () => request('GET', '/api/admin/stats'),
   },
+  documents: {
+    list: (clientId?: string) =>
+      request('GET', clientId ? `/api/documents?client_id=${clientId}` : '/api/documents'),
+    upload: async (clientId: string, file: File) => {
+      const token = getToken();
+      const formData = new FormData();
+      formData.append('client_id', clientId);
+      formData.append('file', file);
+      const res = await fetch(`${API_BASE}/api/documents/upload`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData,
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({ error: res.statusText }));
+        throw new Error(err.error || `Upload failed: ${res.status}`);
+      }
+      return res.json();
+    },
+  },
 };
