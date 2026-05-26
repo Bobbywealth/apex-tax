@@ -201,9 +201,15 @@ function PortalClientCard({ name, subtitle, status }: { name: string; subtitle: 
 }
 
 export default function App() {
+  // Initialize view from hash OR sessionStorage (sessionStorage survives page refresh within the same tab)
   const [view, setView] = useState<"website" | "dashboard">(() => {
     const hash = window.location.hash.replace("#", "");
-    return hash === "dashboard" || hash === "admin" ? "dashboard" : "website";
+    if (hash === "dashboard" || hash === "admin" || hash.startsWith("admin-")) return "dashboard";
+    // Check sessionStorage for admin session
+    try {
+      if (sessionStorage.getItem("apex-view") === "dashboard") return "dashboard";
+    } catch { /* ignore */ }
+    return "website";
   });
   const [token, setToken] = useState<string | null>(() => localStorage.getItem(TOKEN_KEY));
 
@@ -211,7 +217,7 @@ export default function App() {
   useEffect(() => {
     const onHash = () => {
       const hash = window.location.hash.replace("#", "");
-      if (hash === "dashboard" || hash === "admin") {
+      if (hash === "dashboard" || hash === "admin" || hash.startsWith("admin-")) {
         setView("dashboard");
       } else {
         setView("website");
@@ -229,19 +235,30 @@ export default function App() {
     localStorage.setItem(TOKEN_KEY, t);
     setToken(t);
     setView("dashboard");
+    try { sessionStorage.setItem("apex-view", "dashboard"); } catch { /* ignore */ }
+    window.location.hash = "#admin";
   }, []);
 
   const handleLogout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
     setToken(null);
     setView("website");
+    try { sessionStorage.removeItem("apex-view"); } catch { /* ignore */ }
+    window.location.hash = "#home";
+  }, []);
+
+  // Helper to navigate to dashboard view + update hash
+  const goToDashboard = useCallback(() => {
+    setView("dashboard");
+    try { sessionStorage.setItem("apex-view", "dashboard"); } catch { /* ignore */ }
+    window.location.hash = "#admin";
   }, []);
 
   return (
     <div className="min-h-screen text-slate-900" style={{ backgroundColor: LIGHT_BG }}>
-      <Header view={view} setView={setView} isLoggedIn={!!token} />
+      <Header view={view} setView={setView} isLoggedIn={!!token} goToDashboard={goToDashboard} />
       {view === "website" ? (
-        <Website onAdminClick={() => setView("dashboard")} setView={setView} />
+        <Website onAdminClick={goToDashboard} setView={setView} />
       ) : !token ? (
         <AdminLogin onLogin={handleLogin} />
       ) : (
@@ -252,11 +269,12 @@ export default function App() {
 }
 
 function Header({
-  view, setView, isLoggedIn,
+  view, setView, isLoggedIn, goToDashboard,
 }: {
   view: "website" | "dashboard";
   setView: (v: "website" | "dashboard") => void;
   isLoggedIn: boolean;
+  goToDashboard: () => void;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -355,14 +373,14 @@ function Header({
           {isLoggedIn ? (
             <>
               <button
-                onClick={() => setView("website")}
+                onClick={() => { setView("website"); window.location.hash = "#home"; }}
                 className={`rounded-xl px-4 py-2 text-sm font-bold ${view === "website" ? "text-white" : "bg-slate-100"}`}
                 style={view === "website" ? { backgroundColor: NAVY } : undefined}
               >
                 Front End
               </button>
               <button
-                onClick={() => setView("dashboard")}
+                onClick={goToDashboard}
                 className={`rounded-xl px-4 py-2 text-sm font-bold ${view === "dashboard" ? "text-white" : "bg-slate-100"}`}
                 style={view === "dashboard" ? { backgroundColor: GOLD, color: NAVY } : undefined}
               >
@@ -371,7 +389,7 @@ function Header({
             </>
           ) : (
             <button
-              onClick={() => setView("dashboard")}
+              onClick={goToDashboard}
               className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-200"
             >
               Login
@@ -949,7 +967,7 @@ function Footer({ setView }: { setView: (v: "website" | "dashboard") => void }) 
 
           {/* Links */}
           <nav className="flex flex-wrap justify-center gap-6 text-sm font-semibold text-slate-500">
-            <button onClick={() => setView("website")} className="hover:text-slate-800">Front End</button>
+            <button onClick={() => { setView("website"); window.location.hash = "#home"; }} className="hover:text-slate-800">Front End</button>
             <span className="text-slate-300">|</span>
             <a href="#contact" className="hover:text-slate-800">Contact Us</a>
             <span className="text-slate-300">|</span>
@@ -1112,7 +1130,35 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
-  const [activeTab, setActiveTab] = useState<"dashboard" | "clients" | "documents" | "appointments" | "messages">("dashboard");
+  // Init activeTab from URL hash (e.g. #admin-clients), default "dashboard"
+  const [activeTab, setActiveTab] = useState<"dashboard" | "clients" | "documents" | "appointments" | "messages">(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (hash.startsWith("admin-")) {
+      const tab = hash.replace("admin-", "") as any;
+      if (["dashboard","clients","documents","appointments","messages"].includes(tab)) return tab;
+    }
+    return "dashboard";
+  });
+
+  // Keep URL hash in sync with activeTab
+  useEffect(() => {
+    window.location.hash = `admin-${activeTab}`;
+  }, [activeTab]);
+
+  // Listen for hash changes (e.g. browser back/forward)
+  useEffect(() => {
+    const onHash = () => {
+      const hash = window.location.hash.replace("#", "");
+      if (hash.startsWith("admin-")) {
+        const tab = hash.replace("admin-", "") as any;
+        if (["dashboard","clients","documents","appointments","messages"].includes(tab)) {
+          setActiveTab(tab);
+        }
+      }
+    };
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
   const [docClientId, setDocClientId] = useState("");
   const [docFile, setDocFile] = useState<File | null>(null);
   const [docUploading, setDocUploading] = useState<string | false>(false);
