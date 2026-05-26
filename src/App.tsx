@@ -934,10 +934,10 @@ function FinalCta() {
               Start Filing
             </a>
             <a
-              href="/contact"
+              href="#admin-login"
               className="rounded-2xl border border-white px-8 py-4 text-center font-black text-white transition hover:bg-white/10"
             >
-              Access Client Portal
+              Admin Login
             </a>
           </div>
         </div>
@@ -946,67 +946,9 @@ function FinalCta() {
   );
 }
 // ─── Admin Login ────────────────────────────────────────────────
-function AdminLogin({ onLogin }: { onLogin: (token: string) => void }) {
-  const [username, setUsername] = useState("admin@apexbg.com");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-    try {
-      const res = await api.auth.login(username, password);
-      const token = res.token;
-      if (!token) throw new Error("No token received");
-      onLogin(token);
-    } catch (err: any) {
-      setError(err.message || "Invalid credentials");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <div className="flex min-h-[70vh] items-center justify-center px-5">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md rounded-[2rem] bg-white p-10 shadow-2xl"
-      >
-        <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white shadow ring-1 ring-slate-200">
-            <img src={LOGO_URL} alt="Apex Tax" className="h-full w-full object-contain" />
-          </div>
-          <h2 className="text-2xl font-black" style={{ color: NAVY }}>Admin Portal</h2>
-          <p className="mt-2 text-sm text-slate-500">Sign in to access the dashboard</p>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="mb-1 block text-sm font-semibold text-slate-600">Username</label>
-            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)}
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100" required />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm font-semibold text-slate-600">Password</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••"
-              className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-100" required />
-          </div>
-          {error && (
-            <div className="flex items-center gap-2 rounded-xl bg-red-50 p-3 text-sm text-red-600">
-              <XCircle size={16} />{error}
-            </div>
-          )}
-          <button type="submit" disabled={loading}
-            className="w-full rounded-xl py-3 text-sm font-bold text-white shadow-lg hover:scale-[1.02] disabled:opacity-60"
-            style={{ backgroundColor: NAVY }}>
-            {loading ? "Signing in…" : "Sign In"}
-          </button>
-        </form>
-      </motion.div>
-    </div>
-  );
+function AdminLogin({ onLogin: _onLogin }: { onLogin: (token: string) => void }) {
+  // Admin portal hidden for now. Contact Apex Tax directly for admin access.
+  return null;
 }
 
 // ─── Admin Dashboard ────────────────────────────────────────────
