@@ -63,10 +63,25 @@ export const api = {
   intake: {
     submit: (data: { full_name: string; email: string; phone?: string; tax_type?: string; message?: string }) =>
       request('POST', '/api/intake', data),
-    list: () => request('GET', '/api/intake'),
+    list: (params?: { page?: number; limit?: number; status?: string }) => {
+      const qs = new URLSearchParams();
+      if (params?.page) qs.set('page', String(params.page));
+      if (params?.limit) qs.set('limit', String(params.limit));
+      if (params?.status) qs.set('status', params.status);
+      const query = qs.toString() ? `?${qs.toString()}` : '';
+      return request('GET', `/api/intake${query}`) as Promise<{ submissions: any[]; total: number; page: number; pages: number }>;
+    },
     updateStatus: (id: string, status: string) => request('PATCH', `/api/intake/${id}`, { status }),
+    convert: (id: string) => request('POST', `/api/intake/${id}/convert`) as Promise<{ ok: boolean; clientId: string; message: string }>,
   },
   admin: {
     stats: () => request('GET', '/api/admin/stats'),
+    activity: (params?: { page?: number; limit?: number }) => {
+      const qs = new URLSearchParams();
+      if (params?.page) qs.set('page', String(params.page));
+      if (params?.limit) qs.set('limit', String(params.limit));
+      const query = qs.toString() ? `?${qs.toString()}` : '';
+      return request('GET', `/api/admin/activity${query}`) as Promise<{ logs: any[]; total: number; page: number; pages: number }>;
+    },
   },
 };

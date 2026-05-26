@@ -1079,17 +1079,20 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [submissions, setSubmissions] = useState<IntakeSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ msg: string; ok: boolean } | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError("");
     try {
-      const [statsData, intakeData] = await Promise.all([
+      const [statsData, intakeResult] = await Promise.all([
         api.admin.stats(),
         api.intake.list(),
       ]);
       setData(statsData.stats || statsData);
-      setSubmissions(intakeData || []);
+      const subs: IntakeSubmission[] = Array.isArray(intakeResult) ? intakeResult : (intakeResult as any)?.submissions || [];
+      setSubmissions(subs);
     } catch (err: any) {
       if (err.message.includes("401") || err.message.includes("Invalid")) { onLogout(); return; }
       setError(err.message || "Failed to load dashboard");
@@ -1099,6 +1102,39 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   }, [onLogout]);
 
   useEffect(() => { fetchData(); }, [fetchData]);
+
+  const showToast = (msg: string, ok = true) => {
+    setToast({ msg, ok });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const handleConvert = async (id: string) => {
+    setActionLoading(id);
+    try {
+      const res = await api.intake.convert(id);
+      showToast(res.message || "Client created!");
+      fetchData();
+    } catch (err: any) {
+      showToast(err.message || "Failed to convert", false);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleStatusChange = async (id: string, newStatus: string) => {
+    setActionLoading(id);
+    try {
+      await api.intake.updateStatus(id, newStatus);
+      showToast(`Status updated to ${newStatus}`);
+      fetchData();
+    } catch (err: any) {
+      showToast(err.message || "Failed to update status", false);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const STATUS_OPTIONS = ["Pending", "Contacted", "Intake Review", "Client Created", "Rejected"];
 
   const statusColor: Record<string, string> = {
     Pending: "bg-amber-100 text-amber-700",
@@ -1163,6 +1199,13 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           </div>
         )}
 
+        {toast && (
+          <div className={`mb-4 flex items-center gap-3 rounded-2xl p-4 text-sm ${toast.ok ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"}`}>
+            {toast.ok ? <CheckCircle2 size={18} /> : <XCircle size={18} />}
+            {toast.msg}
+          </div>
+        )}
+
         {data && (
           <div className="grid gap-4 md:grid-cols-4">
             <Stat icon={Users} label="Total Clients" value={data.totalClients ?? 0} />
@@ -1196,6 +1239,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                     <th className="p-4 font-semibold">Tax Type</th>
                     <th className="p-4 font-semibold">Status</th>
                     <th className="p-4 font-semibold">Date</th>
+                    <th className="p-4 font-semibold">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1212,6 +1256,32 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
                       <td className="p-4"><span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold capitalize">{s.tax_type?.replace("-", " ")}</span></td>
                       <td className="p-4"><span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusClass(s.status)}`}>{s.status}</span></td>
                       <td className="p-4 text-xs text-slate-400">{formatDate(s.created_at)}</td>
+                      <td className="p-4">
+                        {s.status !== "Client Created" && s.status !== "Rejected" && (
+                          <div className="flex flex-col gap-2">
+                            <button
+                              onClick={() => handleConvert(s.id)}
+                              disabled={actionLoading === s.id}
+                              className="rounded-lg bg-emerald-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-emerald-600 disabled:opacity-50"
+                            >
+                              {actionLoading === s.id ? "…" : "Create Client"}
+                            </button>
+                            <select
+                              value={s.status}
+                              onChange={e => handleStatusChange(s.id, e.target.value)}
+                              disabled={actionLoading === s.id}
+                              className="rounded-lg border border-slate-200 px-2 py-1.5 text-xs disabled:opacity-50"
+                            >
+                              {STATUS_OPTIONS.filter(o => o !== s.status).map(o => (
+                                <option key={o} value={o}>{o}</option>
+                              ))}
+                            </select>
+                          </div>
+                        )}
+                        {(s.status === "Client Created" || s.status === "Rejected") && (
+                          <span className="text-xs text-slate-400">{s.status}</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
