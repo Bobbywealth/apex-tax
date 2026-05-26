@@ -122,7 +122,7 @@ const processSteps = [
   },
 ];
 
-const navItems = ["Home", "Services", "Upload Docs", "Contact"];
+const navItems = ["Home", "Services", "Upload Docs"];
 
 export const demoTests = [
   {
@@ -241,7 +241,7 @@ export default function App() {
     <div className="min-h-screen text-slate-900" style={{ backgroundColor: LIGHT_BG }}>
       <Header view={view} setView={setView} isLoggedIn={!!token} />
       {view === "website" ? (
-        <Website onAdminClick={() => setView("dashboard")} />
+        <Website onAdminClick={() => setView("dashboard")} setView={setView} />
       ) : !token ? (
         <AdminLogin onLogin={handleLogin} />
       ) : (
@@ -314,21 +314,6 @@ function Header({
                 {item}
               </a>
             ))}
-            <hr className="my-2 border-slate-100" />
-            <a
-              href="/contact"
-              onClick={() => setMenuOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-            >
-              Contact Us
-            </a>
-            <a
-              href="/privacy-policy"
-              onClick={() => setMenuOpen(false)}
-              className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
-            >
-              Privacy Policy
-            </a>
           </nav>
         </div>
       )}
@@ -367,18 +352,6 @@ function Header({
 
         {/* Right buttons */}
         <div className="flex gap-2">
-          <a
-            href="/contact"
-            className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-200"
-          >
-            Contact Us
-          </a>
-          <a
-            href="/privacy-policy"
-            className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-200"
-          >
-            Privacy Policy
-          </a>
           {isLoggedIn ? (
             <>
               <button
@@ -391,7 +364,7 @@ function Header({
               <button
                 onClick={() => setView("dashboard")}
                 className={`rounded-xl px-4 py-2 text-sm font-bold ${view === "dashboard" ? "text-white" : "bg-slate-100"}`}
-                style={view === "dashboard" ? { backgroundColor: GOLD } : undefined}
+                style={view === "dashboard" ? { backgroundColor: GOLD, color: NAVY } : undefined}
               >
                 Dashboard
               </button>
@@ -401,7 +374,7 @@ function Header({
               onClick={() => setView("dashboard")}
               className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-200"
             >
-              Admin
+              Dashboard
             </button>
           )}
         </div>
@@ -410,7 +383,7 @@ function Header({
   );
 }
 
-function Website({ onAdminClick }: { onAdminClick: () => void }) {
+function Website({ onAdminClick, setView }: { onAdminClick: () => void; setView: (v: "website" | "dashboard") => void }) {
   return (
     <main>
       <HeroSection onAdminClick={onAdminClick} />
@@ -420,6 +393,7 @@ function Website({ onAdminClick }: { onAdminClick: () => void }) {
       <WhyChooseSection />
       <ProcessIntakeSection />
       <FinalCta onAdminClick={onAdminClick} />
+      <Footer setView={setView} />
     </main>
   );
 }
@@ -953,6 +927,40 @@ function ProcessIntakeSection() {
         </div>
       </div>
     </section>
+  );
+}
+
+// ─── Footer ─────────────────────────────────────────────────────────────
+function Footer({ setView }: { setView: (v: "website" | "dashboard") => void }) {
+  return (
+    <footer className="border-t border-slate-100 bg-white">
+      <div className="mx-auto max-w-7xl px-5 py-10">
+        <div className="flex flex-col items-center gap-6 text-center md:flex-row md:justify-between md:text-left">
+          {/* Logo + tagline */}
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow ring-1 ring-slate-200">
+              <img src={LOGO_URL} alt="Apex Tax" className="h-full w-full object-contain brightness-0" style={{ filter: "brightness(0) opacity(0.7)" }} />
+            </div>
+            <div>
+              <div className="text-sm font-black" style={{ color: NAVY }}>APEX TAX</div>
+              <div className="text-[0.6rem] font-semibold tracking-widest text-slate-400">BUSINESS GROUP</div>
+            </div>
+          </div>
+
+          {/* Links */}
+          <nav className="flex flex-wrap justify-center gap-6 text-sm font-semibold text-slate-500">
+            <button onClick={() => setView("website")} className="hover:text-slate-800">Front End</button>
+            <span className="text-slate-300">|</span>
+            <a href="#contact" className="hover:text-slate-800">Contact Us</a>
+            <span className="text-slate-300">|</span>
+            <a href="https://apex-tax.onrender.com/privacy-policy" target="_blank" rel="noopener" className="hover:text-slate-800">Privacy Policy</a>
+          </nav>
+
+          {/* Copyright */}
+          <p className="text-xs text-slate-400">© {new Date().getFullYear()} Apex Tax Business Group</p>
+        </div>
+      </div>
+    </footer>
   );
 }
 
