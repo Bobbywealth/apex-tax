@@ -209,45 +209,112 @@ export default function App() {
 }
 
 function Header() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const idMap: Record<string, string> = {
+    "Home": "home",
+    "Services": "services",
+    "Upload Docs": "upload",
+    "Contact": "contact",
+  };
+
   return (
-    <header className="sticky top-0 z-20 border-b bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5">
-        <div className="flex items-center gap-3">
+    <header className="sticky top-0 z-20 border-b bg-white/95 backdrop-blur">
+      {/* Mobile: logo centered, hamburger right */}
+      <div className="flex items-center justify-between px-4 py-4 md:hidden">
+        {/* Left spacer to balance centered logo */}
+        <div className="w-8" />
+
+        {/* Centered logo */}
+        <a href="#home" className="flex flex-col items-center gap-1">
           <div
-            className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-[1.4rem] bg-white p-2 shadow-xl ring-1 ring-slate-200"
-            aria-label="Apex Tax logo"
+            className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-white p-1.5 shadow-lg ring-1 ring-slate-200"
           >
-            <img src={LOGO_URL} alt="Apex Tax logo icon" className="h-full w-full object-contain" />
+            <img src={LOGO_URL} alt="Apex Tax logo" className="h-full w-full object-contain" />
+          </div>
+          <div className="text-[1.1rem] font-black tracking-tight leading-none" style={{ color: NAVY }}>
+            APEX TAX
+          </div>
+        </a>
+
+        {/* Hamburger button */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="flex h-8 w-8 flex-col items-center justify-center gap-1.5 rounded-lg bg-slate-100 p-1"
+          aria-label="Toggle menu"
+        >
+          <span className={`block h-0.5 w-5 bg-slate-600 transition-all ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
+          <span className={`block h-0.5 w-5 bg-slate-600 transition-all ${menuOpen ? 'opacity-0' : ''}`} />
+          <span className={`block h-0.5 w-5 bg-slate-600 transition-all ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+        </button>
+      </div>
+
+      {/* Mobile dropdown menu */}
+      {menuOpen && (
+        <div className="border-t border-slate-100 bg-white px-4 py-4 md:hidden">
+          <nav className="flex flex-col gap-1">
+            {navItems.map((item) => (
+              <a
+                key={item}
+                href={`#${idMap[item] || item.toLowerCase().replace(" ", "-")}`}
+                onClick={() => setMenuOpen(false)}
+                className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+              >
+                {item}
+              </a>
+            ))}
+            <hr className="my-2 border-slate-100" />
+            <a
+              href="/contact"
+              onClick={() => setMenuOpen(false)}
+              className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+            >
+              Contact Us
+            </a>
+            <a
+              href="/privacy-policy"
+              onClick={() => setMenuOpen(false)}
+              className="rounded-xl px-4 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50"
+            >
+              Privacy Policy
+            </a>
+          </nav>
+        </div>
+      )}
+
+      {/* Desktop: full header */}
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 hidden md:flex">
+        {/* Logo + name */}
+        <a href="#home" className="flex items-center gap-3">
+          <div
+            className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white p-2 shadow-lg ring-1 ring-slate-200"
+          >
+            <img src={LOGO_URL} alt="Apex Tax logo" className="h-full w-full object-contain" />
           </div>
           <div>
-            <div className="text-[2rem] font-black tracking-tight leading-none" style={{ color: NAVY }}>
+            <div className="text-[1.8rem] font-black tracking-tight leading-none" style={{ color: NAVY }}>
               APEX TAX
             </div>
-            <div
-              className="mt-1 text-[0.7rem] font-semibold tracking-[0.38em]"
-              style={{ color: GOLD }}
-            >
+            <div className="mt-1 text-[0.65rem] font-semibold tracking-[0.38em]" style={{ color: GOLD }}>
               BUSINESS GROUP
             </div>
           </div>
-        </div>
+        </a>
 
-        <nav className="hidden items-center gap-7 text-sm font-semibold text-slate-600 md:flex">
-          {navItems.map((item) => {
-            const idMap: Record<string, string> = {
-              "Home": "home",
-              "Services": "services",
-              "Upload Docs": "upload",
-              "Contact": "contact",
-            };
-            return (
-              <a key={item} href={`#${idMap[item] || item.toLowerCase().replace(" ", "-")}`}>
-                {item}
-              </a>
-            );
-          })}
+        {/* Nav links */}
+        <nav className="flex items-center gap-7 text-sm font-semibold text-slate-600">
+          {navItems.map((item) => (
+            <a
+              key={item}
+              href={`#${idMap[item] || item.toLowerCase().replace(" ", "-")}`}
+              className="transition hover:text-slate-900"
+            >
+              {item}
+            </a>
+          ))}
         </nav>
 
+        {/* Right buttons */}
         <div className="flex gap-2">
           <a
             href="/contact"
