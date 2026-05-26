@@ -61,10 +61,16 @@ export const api = {
     delete: (id: string) => request('DELETE', `/api/clients/${id}`),
   },
   intake: {
-    submit: (data: { full_name: string; email: string; phone?: string; tax_type?: string; message?: string }) =>
+    submit: (data: { full_name: string; email: string; phone?: string; tax_type?: string; message?: string; preferred_date?: string; preferred_time?: string }) =>
       request('POST', '/api/intake', data),
     list: () => request('GET', '/api/intake'),
     updateStatus: (id: string, status: string) => request('PATCH', `/api/intake/${id}`, { status }),
+  },
+  appointments: {
+    list: () => request('GET', '/api/appointments'),
+    create: (data: { client_name: string; email: string; phone: string; date: string; time: string; notes?: string }) =>
+      request('POST', '/api/appointments', data),
+    updateStatus: (id: string, status: string) => request('PATCH', `/api/appointments/${id}`, { status }),
   },
   admin: {
     stats: () => request('GET', '/api/admin/stats'),

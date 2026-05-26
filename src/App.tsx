@@ -796,7 +796,7 @@ function WhyChooseSection() {
   );
 }
 function ProcessIntakeSection() {
-  const [form, setForm] = useState({ full_name: '', email: '', phone: '', tax_type: '', message: '' });
+  const [form, setForm] = useState({ full_name: '', email: '', phone: '', tax_type: '', message: '', preferred_date: '', preferred_time: '' });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
@@ -868,12 +868,14 @@ function ProcessIntakeSection() {
                   <CheckCircle2 size={24} style={{ color: GOLD }} className="lg:size-8" />
                 </div>
                 <h4 className="text-xl font-black lg:text-2xl" style={{ color: NAVY }}>Request Submitted!</h4>
-                <p className="mt-1.5 text-sm text-slate-500 lg:mt-2">We'll contact you within 24 hours to get started.</p>
+                <p className="mt-1.5 text-sm text-slate-500 lg:mt-2">
+                  {form.preferred_date ? `Appointment requested for ${form.preferred_date}${form.preferred_time ? ` at ${form.preferred_time}` : ''}. We'll confirm shortly.` : "We'll contact you within 24 hours to get started."}
+                </p>
                 <button
                   type="button"
                   className="mt-5 rounded-xl px-5 py-2.5 text-sm font-bold text-white lg:mt-6 lg:rounded-2xl lg:px-6 lg:py-3"
                   style={{ backgroundColor: NAVY }}
-                  onClick={() => { setSuccess(false); setForm({ full_name: '', email: '', phone: '', tax_type: '', message: '' }); }}
+                  onClick={() => { setSuccess(false); setForm({ full_name: '', email: '', phone: '', tax_type: '', message: '', preferred_date: '', preferred_time: '' }); }}
                 >
                   Submit Another
                 </button>
@@ -913,6 +915,37 @@ function ProcessIntakeSection() {
                   <option value="self-employed">Self-Employed / 1099</option>
                   <option value="both">Both Personal + Self-Employed</option>
                 </select>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-slate-500">Preferred Date</label>
+                    <input
+                      type="date"
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100 lg:py-3"
+                      value={form.preferred_date}
+                      onChange={(e) => setForm({ ...form, preferred_date: e.target.value })}
+                      min={new Date().toISOString().split('T')[0]}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-slate-500">Preferred Time</label>
+                    <select
+                      className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-600 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100 lg:py-3"
+                      value={form.preferred_time}
+                      onChange={(e) => setForm({ ...form, preferred_time: e.target.value })}
+                    >
+                      <option value="">Select time</option>
+                      <option value="9:00 AM">9:00 AM</option>
+                      <option value="10:00 AM">10:00 AM</option>
+                      <option value="11:00 AM">11:00 AM</option>
+                      <option value="12:00 PM">12:00 PM</option>
+                      <option value="1:00 PM">1:00 PM</option>
+                      <option value="2:00 PM">2:00 PM</option>
+                      <option value="3:00 PM">3:00 PM</option>
+                      <option value="4:00 PM">4:00 PM</option>
+                      <option value="5:00 PM">5:00 PM</option>
+                    </select>
+                  </div>
+                </div>
                 <textarea
                   placeholder="Anything else we should know?"
                   rows={3}
@@ -1080,6 +1113,8 @@ interface IntakeSubmission {
   phone: string;
   tax_type: string;
   message: string;
+  preferred_date: string;
+  preferred_time: string;
   documents_count: number;
   status: string;
   created_at: string;
@@ -1091,6 +1126,8 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"dashboard" | "clients" | "documents" | "appointments" | "messages">("dashboard");
+  const [appointments, setAppointments] = useState<any[]>([]);
+  const [appointmentsLoading, setAppointmentsLoading] = useState(false);
   const [docClientId, setDocClientId] = useState("");
   const [docFile, setDocFile] = useState<File | null>(null);
   const [docUploading, setDocUploading] = useState<string | false>(false);
@@ -1169,6 +1206,20 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
       fetchDocs(docClientId || undefined);
     }
   }, [activeTab, docClientId]);
+
+  // Fetch appointments when switching to appointments tab
+  useEffect(() => {
+    if (activeTab === "appointments") {
+      setAppointmentsLoading(true);
+      api.appointments.list().then(data => {
+        setAppointments(data || []);
+        setAppointmentsLoading(false);
+      }).catch(() => {
+        setAppointments([]);
+        setAppointmentsLoading(false);
+      });
+    }
+  }, [activeTab]);
 
   const navItems: { icon: any; label: string; key: typeof activeTab }[] = [
     { icon: BarChart3, label: "Dashboard", key: "dashboard" },
@@ -1437,15 +1488,105 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           <>
             <div className="mb-5 lg:mb-6">
               <h2 className="text-xl font-black lg:text-3xl" style={{ color: NAVY }}>Appointments</h2>
-              <p className="text-xs text-slate-500 lg:text-sm">Schedule and manage client appointments</p>
+              <p className="text-xs text-slate-500 lg:text-sm">Client consultation requests from intake form</p>
             </div>
-            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 text-center shadow-sm">
-              <div className="mb-3 rounded-2xl p-4" style={{ backgroundColor: PALE_GOLD }}>
-                <Calendar size={28} style={{ color: GOLD }} />
+
+            {/* Appointment stats */}
+            <div className="mb-4 grid grid-cols-3 gap-3 lg:mb-5">
+              {[
+                { label: "Pending", value: appointments.filter(a => a.status === "Pending" || !a.status).length, color: "bg-amber-50 text-amber-700 border-amber-100" },
+                { label: "Confirmed", value: appointments.filter(a => a.status === "Confirmed").length, color: "bg-emerald-50 text-emerald-700 border-emerald-100" },
+                { label: "Completed", value: appointments.filter(a => a.status === "Completed" || a.status === "Done").length, color: "bg-blue-50 text-blue-700 border-blue-100" },
+              ].map(stat => (
+                <div key={stat.label} className={`rounded-xl border p-3 text-center ${stat.color}`}>
+                  <div className="text-xl font-black lg:text-3xl">{stat.value}</div>
+                  <div className="text-[10px] font-semibold uppercase tracking-wide lg:text-xs">{stat.label}</div>
+                </div>
+              ))}
+            </div>
+
+            {appointmentsLoading ? (
+              <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="h-20 animate-pulse rounded-2xl bg-slate-100" />)}</div>
+            ) : appointments.length === 0 ? (
+              <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 text-center shadow-sm">
+                <div className="mb-3 rounded-2xl p-4" style={{ backgroundColor: PALE_GOLD }}>
+                  <Calendar size={28} style={{ color: GOLD }} />
+                </div>
+                <h3 className="text-base font-bold" style={{ color: NAVY }}>No appointments yet</h3>
+                <p className="mt-1 max-w-xs text-xs text-slate-500">Clients who requested appointments via the intake form will appear here.</p>
               </div>
-              <h3 className="text-base font-bold" style={{ color: NAVY }}>No appointments scheduled</h3>
-              <p className="mt-1 max-w-xs text-xs text-slate-500">Client consultation appointments will appear here once scheduled.</p>
-            </div>
+            ) : (
+              <div className="space-y-3">
+                {appointments.map((apt: any) => {
+                  const aptStatus = apt.status || "Pending";
+                  const statusColors: Record<string, string> = {
+                    Pending: "bg-amber-100 text-amber-700",
+                    Confirmed: "bg-emerald-100 text-emerald-700",
+                    Completed: "bg-blue-100 text-blue-700",
+                    Cancelled: "bg-red-100 text-red-700",
+                  };
+                  return (
+                    <div key={apt.id} className="rounded-2xl bg-white p-4 shadow-sm">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex min-w-0 flex-col gap-1.5">
+                          <div className="flex items-center gap-2">
+                            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-black text-white" style={{ backgroundColor: NAVY }}>
+                              {apt.client_name?.charAt(0) || apt.name?.charAt(0) || "?"}
+                            </div>
+                            <div>
+                              <span className="font-bold" style={{ color: NAVY }}>{apt.client_name || apt.name}</span>
+                              <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] text-slate-400 lg:text-xs">
+                                <span>{apt.email}</span>
+                                {apt.phone && <span>{apt.phone}</span>
+}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="ml-11 flex flex-wrap items-center gap-2 text-xs text-slate-600">
+                            {apt.date && (
+                              <span className="flex items-center gap-1 font-semibold">
+                                <Calendar size={12} style={{ color: GOLD }} />
+                                {apt.date}{apt.time ? ` at ${apt.time}` : ""}
+                              </span>
+                            )}
+                            {apt.notes && <span className="text-slate-400">— {apt.notes}</span>}
+                          </div>
+                        </div>
+                        <div className="flex flex-col items-end gap-2">
+                          <span className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold lg:px-3 lg:py-1 lg:text-xs ${statusColors[aptStatus] || "bg-slate-100 text-slate-600"}`}>{aptStatus}</span>
+                          <div className="flex gap-1">
+                            {aptStatus === "Pending" && (
+                              <>
+                                <button
+                                  onClick={async () => {
+                                    try { await api.appointments.updateStatus(apt.id, "Confirmed"); setAppointments(prev => prev.map(a => a.id === apt.id ? { ...a, status: "Confirmed" } : a)); } catch {}
+                                  }}
+                                  className="rounded-lg bg-emerald-100 px-2 py-1 text-[10px] font-bold text-emerald-700 hover:bg-emerald-200"
+                                >Confirm</button>
+                                <button
+                                  onClick={async () => {
+                                    try { await api.appointments.updateStatus(apt.id, "Cancelled"); setAppointments(prev => prev.map(a => a.id === apt.id ? { ...a, status: "Cancelled" } : a)); } catch {}
+                                  }}
+                                  className="rounded-lg bg-red-100 px-2 py-1 text-[10px] font-bold text-red-700 hover:bg-red-200"
+                                >Cancel</button>
+                              </>
+                            )}
+                            {aptStatus === "Confirmed" && (
+                              <button
+                                onClick={async () => {
+                                  try { await api.appointments.updateStatus(apt.id, "Completed"); setAppointments(prev => prev.map(a => a.id === apt.id ? { ...a, status: "Completed" } : a)); } catch {}
+                                }}
+                                className="rounded-lg bg-blue-100 px-2 py-1 text-[10px] font-bold text-blue-700 hover:bg-blue-200"
+                              >Mark Done</button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </>
         )}
 
@@ -1453,15 +1594,47 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
           <>
             <div className="mb-5 lg:mb-6">
               <h2 className="text-xl font-black lg:text-3xl" style={{ color: NAVY }}>Messages</h2>
-              <p className="text-xs text-slate-500 lg:text-sm">Client communications and notifications</p>
+              <p className="text-xs text-slate-500 lg:text-sm">Messages from client intake submissions</p>
             </div>
-            <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 text-center shadow-sm">
-              <div className="mb-3 rounded-2xl p-4" style={{ backgroundColor: PALE_GOLD }}>
-                <Mail size={28} style={{ color: GOLD }} />
+            {loading && submissions.length === 0 ? (
+              <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="h-24 animate-pulse rounded-2xl bg-slate-100" />)}</div>
+            ) : submissions.filter(s => s.message).length === 0 ? (
+              <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-200 bg-white p-8 text-center shadow-sm">
+                <div className="mb-3 rounded-2xl p-4" style={{ backgroundColor: PALE_GOLD }}>
+                  <Mail size={28} style={{ color: GOLD }} />
+                </div>
+                <h3 className="text-base font-bold" style={{ color: NAVY }}>No messages yet</h3>
+                <p className="mt-1 max-w-xs text-xs text-slate-500">Messages from clients who submitted the intake form will appear here.</p>
               </div>
-              <h3 className="text-base font-bold" style={{ color: NAVY }}>No messages</h3>
-              <p className="mt-1 max-w-xs text-xs text-slate-500">Client messages and system notifications will appear here.</p>
-            </div>
+            ) : (
+              <div className="space-y-3">
+                {submissions.filter(s => s.message).map((s) => (
+                  <div key={s.id} className="rounded-2xl bg-white p-4 shadow-sm">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <div className="flex items-center gap-2">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-black text-white" style={{ backgroundColor: NAVY }}>
+                            {s.full_name.charAt(0)}
+                          </div>
+                          <div>
+                            <span className="font-bold" style={{ color: NAVY }}>{s.full_name}</span>
+                            <span className="ml-2 text-[10px] text-slate-400 lg:text-xs">{s.email}</span>
+                          </div>
+                        </div>
+                        <p className="ml-10 text-sm text-slate-600">{s.message}</p>
+                        {s.preferred_date && (
+                          <div className="ml-10 mt-1 flex items-center gap-1 text-[10px] text-slate-400 lg:text-xs">
+                            <Calendar size={10} />
+                            <span>Requested appointment: {s.preferred_date}{s.preferred_time ? ` at ${s.preferred_time}` : ''}</span>
+                          </div>
+                        )}
+                      </div>
+                      <span className="shrink-0 text-[10px] text-slate-400 lg:text-xs">{formatDate(s.created_at)}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </>
         )}
       </main>
