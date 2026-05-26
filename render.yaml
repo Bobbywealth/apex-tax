@@ -1,0 +1,4 @@
+routes:
+  - src: /.*
+    dst: /index.html
+    status: 200
