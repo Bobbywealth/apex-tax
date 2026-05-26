@@ -441,33 +441,37 @@ function HeroSection({ onAdminClick }: { onAdminClick: () => void }) {
 
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_85%_20%,rgba(213,170,68,0.18),transparent_28%)]" />
 
-      <div className="relative mx-auto max-w-7xl px-5 py-14 lg:py-16">
-        <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+      <div className="relative mx-auto max-w-7xl px-5 py-10 lg:py-16">
+        {/* Mobile: content first, no hero image. Desktop: side-by-side */}
+        <div className="grid gap-10 lg:gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+          {/* Left: content */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             className="relative z-10"
           >
-            <div className="inline-flex items-center gap-3 rounded-full border border-[#D5AA44]/50 bg-white/5 px-5 py-3 text-sm font-bold text-white shadow-lg backdrop-blur">
-              <ShieldCheck size={18} style={{ color: GOLD }} />
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#D5AA44]/50 bg-white/5 px-4 py-2 text-xs font-bold text-white shadow-lg backdrop-blur lg:text-sm lg:gap-3 lg:px-5 lg:py-3">
+              <ShieldCheck size={16} style={{ color: GOLD }} className="hidden sm:block" />
+              <ShieldCheck size={14} style={{ color: GOLD }} className="sm:hidden" />
               NJ's Trusted Tax Experts
             </div>
 
-            <h1 className="mt-8 max-w-4xl text-5xl font-black leading-[0.98] tracking-tight text-white md:text-7xl">
+            <h1 className="mt-6 max-w-4xl text-4xl font-black leading-[1.05] tracking-tight text-white lg:mt-8 lg:text-5xl lg:leading-[0.98] md:text-6xl">
               Smart Tax Solutions. Real Client Care.
             </h1>
 
-            <div className="mt-8 h-1 w-20 rounded-full" style={{ backgroundColor: GOLD }} />
+            <div className="mt-5 h-1 w-16 rounded-full lg:mt-8 lg:w-20" style={{ backgroundColor: GOLD }} />
 
-            <p className="mt-7 max-w-2xl text-xl leading-9 text-slate-200">
-              Expert tax filing for individuals and self-employed clients with a secure client portal, simple uploads, real-time updates, and personal support.
+            <p className="mt-5 max-w-2xl text-base leading-7 text-slate-200 lg:mt-7 lg:text-xl lg:leading-9">
+              Expert tax filing for individuals and self-employed with a secure portal, simple uploads, and personal support.
             </p>
 
-            <div className="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
+            {/* Buttons: always side-by-side on all sizes */}
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center lg:mt-10">
               <button
                 type="button"
                 onClick={() => document.getElementById('upload')?.scrollIntoView({ behavior: 'smooth' })}
-                className="rounded-xl px-7 py-4 text-center font-black text-slate-950 shadow-2xl transition hover:scale-105"
+                className="rounded-xl px-6 py-3.5 text-center text-sm font-black text-slate-950 shadow-2xl transition hover:scale-105 sm:text-base sm:px-7 sm:py-4"
                 style={{ backgroundColor: GOLD }}
               >
                 Start My Tax Filing
@@ -476,13 +480,14 @@ function HeroSection({ onAdminClick }: { onAdminClick: () => void }) {
               <button
                 type="button"
                 onClick={onAdminClick}
-                className="rounded-xl border border-[#D5AA44]/70 bg-transparent px-7 py-4 text-center font-black text-white transition hover:bg-white/10"
+                className="rounded-xl border border-[#D5AA44]/70 bg-transparent px-6 py-3.5 text-center text-sm font-black text-white transition hover:bg-white/10 sm:text-base sm:px-7 sm:py-4"
               >
                 Admin Login
               </button>
             </div>
 
-            <div className="mt-10 grid max-w-3xl gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            {/* Feature pills: 2x2 grid on mobile */}
+            <div className="mt-8 grid grid-cols-2 gap-3 lg:mt-10 lg:max-w-3xl lg:gap-4">
               {[
                 [ShieldCheck, "IRS Compliant", "Secure & encrypted"],
                 [BarChart3, "Max Refunds", "Optimized filing"],
@@ -491,21 +496,22 @@ function HeroSection({ onAdminClick }: { onAdminClick: () => void }) {
               ].map(([Icon, title, label]) => (
                 <div
                   key={title as string}
-                  className="rounded-2xl border border-white/10 bg-white/5 p-4 text-white backdrop-blur"
+                  className="rounded-xl border border-white/10 bg-white/5 p-3 text-white backdrop-blur lg:rounded-2xl lg:p-4"
                 >
-                  <Icon size={24} style={{ color: GOLD }} />
-                  <div className="mt-3 text-sm font-black">{title as string}</div>
-                  <div className="mt-1 text-xs leading-5 text-slate-300">{label as string}</div>
+                  <Icon size={18} style={{ color: GOLD }} className="lg:size-6" />
+                  <div className="mt-2 text-xs font-black lg:mt-3 lg:text-sm">{title as string}</div>
+                  <div className="mt-0.5 text-[10px] leading-4 text-slate-300 lg:mt-1 lg:text-xs lg:leading-5">{label as string}</div>
                 </div>
               ))}
             </div>
           </motion.div>
 
+          {/* Right: hero phone image — only visible on large screens */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.08 }}
-            className="relative"
+            className="relative hidden lg:block"
           >
             <div className="absolute -right-10 top-10 h-48 w-48 rounded-full blur-3xl"
               style={{ backgroundColor: GOLD, opacity: 0.18 }}
@@ -516,7 +522,7 @@ function HeroSection({ onAdminClick }: { onAdminClick: () => void }) {
               <img
                 src={HERO_IMAGE_URL}
                 alt="Luxury Apex Tax dashboard preview"
-                className="min-h-[720px] w-full object-cover object-center"
+                className="min-h-[620px] w-full object-cover object-center"
               />
 
               <div className="absolute bottom-6 left-6 z-20 rounded-full border border-white/10 bg-[#06162B]/70 px-5 py-3 text-sm font-bold text-white shadow-2xl backdrop-blur-xl">
@@ -532,16 +538,17 @@ function HeroSection({ onAdminClick }: { onAdminClick: () => void }) {
 
 function FeaturedImageSection() {
   return (
-    <section className="relative -mt-24 pb-10">
-      <div className="mx-auto max-w-7xl px-5">
+    <section className="relative lg:-mt-24 pb-8 lg:pb-10">
+      <div className="mx-auto max-w-7xl px-4 lg:px-5">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="overflow-hidden rounded-[2.5rem] border border-white/10 bg-white shadow-2xl"
+          className="overflow-hidden rounded-2xl border border-white/10 bg-white shadow-2xl lg:rounded-[2.5rem]"
         >
           <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
-            <div className="relative min-h-[420px] overflow-hidden bg-[#081A33]">
+            {/* Left panel — navy background */}
+            <div className="relative min-h-[280px] overflow-hidden bg-[#081A33] lg:min-h-[420px]">
               <img
                 src={LOGO_URL}
                 alt="Apex Tax Lion"
@@ -549,84 +556,85 @@ function FeaturedImageSection() {
               />
               <div className="absolute inset-0 bg-gradient-to-br from-[#081A33] via-[#132D52]/90 to-[#132D52]" />
 
-              <div className="relative flex h-full flex-col justify-between p-10 text-white">
+              <div className="relative flex h-full flex-col justify-between p-6 text-white lg:p-10">
                 <div>
                   <Pill>Premium Client Experience</Pill>
-                  <h3 className="mt-6 max-w-xl text-5xl font-black leading-tight">
+                  <h3 className="mt-4 max-w-xl text-2xl font-black leading-tight lg:mt-6 lg:text-4xl xl:text-5xl">
                     A Modern Tax Company Built Around Simplicity & Trust.
                   </h3>
                 </div>
 
-                <div className="grid gap-4 sm:grid-cols-3">
+                {/* Feature chips — 3 cols on lg, stack on mobile */}
+                <div className="mt-5 grid grid-cols-3 gap-2 lg:mt-0 lg:gap-4">
                   {[
                     ["Encrypted", "Secure Uploads"],
                     ["Fast", "Status Updates"],
                     ["Simple", "Client Experience"],
                   ].map(([title, sub]) => (
-                    <div key={title} className="rounded-2xl border border-white/10 bg-white/10 p-4 backdrop-blur">
-                      <div className="text-2xl font-black">{title}</div>
-                      <div className="mt-1 text-sm text-slate-300">{sub}</div>
+                    <div key={title} className="rounded-xl border border-white/10 bg-white/10 p-2.5 text-center backdrop-blur lg:rounded-2xl lg:p-4 lg:text-left">
+                      <div className="text-xs font-black lg:text-2xl">{title}</div>
+                      <div className="mt-0.5 hidden text-[10px] text-slate-300 lg:mt-1 lg:text-sm lg:block">{sub}</div>
                     </div>
                   ))}
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-10">
-              <div className="flex items-center justify-between">
+            {/* Right panel — white, portal activity feed */}
+            <div className="bg-white p-6 lg:p-10">
+              <div className="flex items-start justify-between gap-3">
                 <div>
-                  <div className="text-sm font-bold uppercase tracking-[0.25em] text-slate-400">
+                  <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 lg:text-sm lg:tracking-[0.25em]">
                     Secure Client Portal
                   </div>
-                  <h3 className="mt-2 text-4xl font-black" style={{ color: NAVY }}>
+                  <h3 className="mt-1.5 text-2xl font-black lg:mt-2 lg:text-4xl" style={{ color: NAVY }}>
                     Tax Filing Activity
                   </h3>
                 </div>
 
-                <div className="rounded-2xl p-4" style={{ backgroundColor: PALE_GOLD }}>
-                  <ShieldCheck size={28} style={{ color: GOLD }} />
+                <div className="rounded-xl p-2.5 lg:rounded-2xl lg:p-4" style={{ backgroundColor: PALE_GOLD }}>
+                  <ShieldCheck size={20} style={{ color: GOLD }} className="lg:size-7" />
                 </div>
               </div>
 
-              <div className="mt-8 space-y-5">
-                <div className="rounded-2xl border border-slate-100 bg-slate-50 p-5">
-                  <div className="flex items-center justify-between">
+              <div className="mt-5 space-y-3 lg:mt-8 lg:space-y-5">
+                <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-3 lg:rounded-2xl lg:p-5">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 size={16} style={{ color: GOLD }} className="lg:size-5 shrink-0" />
                     <div>
-                      <div className="font-black" style={{ color: NAVY }}>
+                      <div className="text-xs font-black lg:text-base" style={{ color: NAVY }}>
                         W-2 Uploaded
                       </div>
-                      <div className="mt-1 text-sm text-slate-500">
+                      <div className="mt-0.5 text-[10px] text-slate-500 lg:mt-1 lg:text-sm">
                         Marcus Johnson · 2 mins ago
                       </div>
                     </div>
-                    <CheckCircle2 style={{ color: GOLD }} />
                   </div>
                 </div>
-                <div className="rounded-2xl border border-slate-100 bg-slate-50 p-5">
-                  <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-3 lg:rounded-2xl lg:p-5">
+                  <div className="flex items-center gap-3">
+                    <BarChart3 size={16} style={{ color: GOLD }} className="lg:size-5 shrink-0" />
                     <div>
-                      <div className="font-black" style={{ color: NAVY }}>
+                      <div className="text-xs font-black lg:text-base" style={{ color: NAVY }}>
                         Return Under Review
                       </div>
-                      <div className="mt-1 text-sm text-slate-500">
+                      <div className="mt-0.5 text-[10px] text-slate-500 lg:mt-1 lg:text-sm">
                         Alicia Brown · Assigned to preparer
                       </div>
                     </div>
-                    <BarChart3 style={{ color: GOLD }} />
                   </div>
                 </div>
-
-                <div className="rounded-2xl border border-slate-100 bg-slate-50 p-5">
-                  <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50 p-3 lg:rounded-2xl lg:p-5">
+                  <div className="flex items-center gap-3">
+                    <FileText size={16} style={{ color: GOLD }} className="lg:size-5 shrink-0" />
                     <div>
-                      <div className="font-black" style={{ color: NAVY }}>
+                      <div className="text-xs font-black lg:text-base" style={{ color: NAVY }}>
                         Refund Estimate Updated
                       </div>
-                      <div className="mt-1 text-sm text-slate-500">
+                      <div className="mt-0.5 text-[10px] text-slate-500 lg:mt-1 lg:text-sm">
                         Tanya Williams · $1,415 estimated
                       </div>
                     </div>
-                    <FileText style={{ color: GOLD }} />
                   </div>
                 </div>
               </div>
@@ -649,42 +657,42 @@ function ServicesSection() {
         }}
       />
       <div className="relative mx-auto max-w-7xl px-5">
-        <div className="mb-16 flex flex-col justify-between gap-10 lg:flex-row lg:items-end">
+        <div className="mb-10 flex flex-col justify-between gap-8 lg:mb-16 lg:flex-row lg:items-end">
           <div className="max-w-3xl">
             <Pill>Trusted Tax Filing Support</Pill>
-            <h2 className="mt-6 text-5xl font-black leading-tight md:text-6xl" style={{ color: NAVY }}>
+            <h2 className="mt-4 text-3xl font-black leading-tight lg:mt-6 lg:text-5xl md:text-4xl" style={{ color: NAVY }}>
               Tax Services Designed For Individuals & Self-Employed Filers.
             </h2>
           </div>
-          <div className="max-w-lg rounded-[2rem] bg-white p-8 shadow-2xl">
-            <div className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400">
+          <div className="max-w-lg rounded-2xl bg-white p-5 shadow-2xl lg:rounded-[2rem] lg:p-8">
+            <div className="text-xs font-bold uppercase tracking-[0.2em] text-slate-400 lg:text-sm">
               Average Refund Tracked
             </div>
-            <div className="mt-3 text-6xl font-black" style={{ color: NAVY }}>
+            <div className="mt-2 text-4xl font-black lg:mt-3 lg:text-6xl" style={{ color: NAVY }}>
               $1,250+
             </div>
-            <p className="mt-4 leading-7 text-slate-600">
+            <p className="mt-3 leading-6 text-slate-600 lg:mt-4 lg:leading-7">
               Helping clients organize documents, file accurately, and track their tax return status.
             </p>
           </div>
         </div>
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => {
             const Icon = service.icon;
             return (
               <motion.div
-                whileHover={{ y: -8 }}
-                className="rounded-3xl bg-white p-8 shadow-lg transition"
+                whileHover={{ y: -4 }}
+                className="rounded-2xl bg-white p-5 shadow-lg transition lg:rounded-3xl lg:p-8"
                 key={service.title}
               >
-                <div className="mb-6 inline-flex rounded-2xl p-4" style={{ backgroundColor: PALE_GOLD }}>
-                  <Icon style={{ color: GOLD }} size={34} />
+                <div className="mb-4 inline-flex rounded-xl p-3 lg:mb-6 lg:rounded-2xl lg:p-4" style={{ backgroundColor: PALE_GOLD }}>
+                  <Icon style={{ color: GOLD }} size={22} className="lg:size-[34px]" />
                 </div>
-                <h3 className="text-2xl font-black" style={{ color: NAVY }}>
+                <h3 className="text-base font-black lg:text-2xl" style={{ color: NAVY }}>
                   {service.title}
                 </h3>
-                <p className="mt-4 leading-7 text-slate-600">{service.text}</p>
-                <button type="button" className="mt-6 font-bold" style={{ color: GOLD }}>
+                <p className="mt-2.5 text-sm leading-6 text-slate-600 lg:mt-4 lg:text-base lg:leading-7">{service.text}</p>
+                <button type="button" className="mt-4 text-sm font-bold lg:mt-6" style={{ color: GOLD }}>
                   Learn More →
                 </button>
               </motion.div>
@@ -703,31 +711,31 @@ function TestimonialsSection() {
         style={{ background: `radial-gradient(circle at center, ${GOLD}, transparent 60%)` }}
       />
       <div className="relative mx-auto max-w-7xl px-5">
-        <div className="mb-16 text-center text-white">
+        <div className="mb-12 text-center text-white lg:mb-16">
           <Pill>Client Success Stories</Pill>
-          <h2 className="mt-6 text-5xl font-black leading-tight md:text-6xl">
+          <h2 className="mt-4 text-2xl font-black leading-tight lg:mt-6 lg:text-5xl md:text-4xl">
             Trusted By Individuals, Families & Self-Employed Filers.
           </h2>
-          <p className="mx-auto mt-6 max-w-3xl text-xl leading-9 text-slate-300">
+          <p className="mx-auto mt-4 max-w-3xl text-sm leading-6 text-slate-300 lg:mt-6 lg:text-xl lg:leading-9">
             Apex Tax Business Group delivers a premium tax filing experience with simple uploads, clear updates, and organized client communication.
           </p>
         </div>
         <div className="grid gap-8 lg:grid-cols-3">
           {testimonials.map((testimonial) => (
             <motion.div
-              whileHover={{ y: -8 }}
+              whileHover={{ y: -4 }}
               key={testimonial.name}
-              className="rounded-[2rem] bg-white p-8 shadow-2xl"
+              className="rounded-2xl bg-white p-5 shadow-2xl lg:rounded-[2rem] lg:p-8"
             >
-              <div className="mb-6 flex gap-1 text-2xl" style={{ color: GOLD }}>
+              <div className="mb-4 flex gap-1 text-lg lg:mb-6 lg:text-2xl" style={{ color: GOLD }}>
                 ★★★★★
               </div>
-              <p className="text-lg leading-8 text-slate-600">"{testimonial.quote}"</p>
-              <div className="mt-8 border-t pt-5">
-                <div className="text-xl font-black" style={{ color: NAVY }}>
+              <p className="text-sm leading-6 text-slate-600 lg:text-lg lg:leading-8">"{testimonial.quote}"</p>
+              <div className="mt-5 border-t border-slate-100 pt-4 lg:mt-8 lg:pt-5">
+                <div className="text-base font-black lg:text-xl" style={{ color: NAVY }}>
                   {testimonial.name}
                 </div>
-                <div className="text-sm text-slate-500">Verified Client</div>
+                <div className="text-xs text-slate-500 lg:text-sm">Verified Client</div>
               </div>
             </motion.div>
           ))}
@@ -747,40 +755,42 @@ function WhyChooseSection() {
     "Modern CRM dashboard and document storage",
   ];
   return (
-    <section className="bg-white py-24">
-      <div className="mx-auto grid max-w-7xl gap-16 px-5 md:grid-cols-2 md:items-center">
+    <section className="bg-white py-12 lg:py-24">
+      <div className="mx-auto grid max-w-7xl gap-10 px-4 md:grid-cols-2 md:items-center lg:gap-16 lg:px-5">
+        {/* Left: reasons list */}
         <div>
           <Pill>Why Choose Apex</Pill>
-          <h2 className="mt-5 text-5xl font-black leading-tight" style={{ color: NAVY }}>
+          <h2 className="mt-4 text-2xl font-black leading-tight lg:mt-5 lg:text-5xl" style={{ color: NAVY }}>
             Built Around Trust, Speed, and Professionalism.
           </h2>
-          <div className="mt-10 grid gap-6">
+          <div className="mt-6 grid gap-3 lg:mt-10 lg:gap-6">
             {reasons.map((item) => (
-              <div key={item} className="flex items-start gap-4 rounded-2xl bg-slate-50 p-5">
-                <div className="mt-1 rounded-full p-2" style={{ backgroundColor: PALE_GOLD }}>
-                  <CheckCircle2 size={18} style={{ color: GOLD }} />
+              <div key={item} className="flex items-start gap-3 rounded-xl bg-slate-50 p-3.5 lg:gap-4 lg:rounded-2xl lg:p-5">
+                <div className="mt-0.5 shrink-0 rounded-full p-1.5 lg:mt-1 lg:p-2" style={{ backgroundColor: PALE_GOLD }}>
+                  <CheckCircle2 size={14} style={{ color: GOLD }} className="lg:size-[18px]" />
                 </div>
-                <div className="text-lg font-semibold text-slate-700">{item}</div>
+                <div className="text-sm font-semibold text-slate-700 lg:text-lg">{item}</div>
               </div>
             ))}
           </div>
         </div>
-        <div className="rounded-[2.5rem] p-8 shadow-2xl" style={{ backgroundColor: NAVY }}>
-          <div className="rounded-3xl bg-white p-8">
-            <div className="flex items-center justify-between">
+        {/* Right: client dashboard preview */}
+        <div className="rounded-2xl p-4 shadow-2xl lg:rounded-[2.5rem] lg:p-8" style={{ backgroundColor: NAVY }}>
+          <div className="rounded-2xl bg-white p-4 lg:rounded-3xl lg:p-8">
+            <div className="flex items-start justify-between gap-2">
               <div>
-                <div className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">
+                <div className="text-[10px] font-semibold uppercase tracking-[0.15em] text-slate-400 lg:text-sm lg:tracking-[0.2em]">
                   Tax Dashboard
                 </div>
-                <h3 className="mt-2 text-3xl font-black" style={{ color: NAVY }}>
+                <h3 className="mt-1 text-lg font-black lg:mt-2 lg:text-3xl" style={{ color: NAVY }}>
                   Client Management
                 </h3>
               </div>
-              <div className="rounded-2xl p-3" style={{ backgroundColor: PALE_GOLD }}>
-                <BarChart3 style={{ color: GOLD }} />
+              <div className="rounded-xl p-2 lg:rounded-2xl lg:p-3" style={{ backgroundColor: PALE_GOLD }}>
+                <BarChart3 size={18} style={{ color: GOLD }} className="lg:size-auto" />
               </div>
             </div>
-            <div className="mt-8 space-y-5">
+            <div className="mt-4 space-y-2.5 lg:mt-8 lg:space-y-5">
               <PortalClientCard name="Marcus Johnson" subtitle="2025 Personal Return" status="Filed" />
               <PortalClientCard name="Alicia Brown" subtitle="Self-Employed Tax Return" status="In Review" />
               <PortalClientCard name="Tanya Williams" subtitle="Refund Processing" status="Pending Docs" />
@@ -813,61 +823,61 @@ function ProcessIntakeSection() {
   };
 
   return (
-    <section id="upload" className="relative overflow-hidden py-28">
+    <section id="upload" className="relative overflow-hidden py-12 lg:py-28">
       <div
         className="absolute left-0 top-0 h-full w-full opacity-5"
         style={{
           background: `radial-gradient(circle at top left, ${NAVY}, transparent 35%), radial-gradient(circle at bottom right, ${GOLD}, transparent 35%)`,
         }}
       />
-      <div className="relative mx-auto grid max-w-7xl gap-16 px-5 lg:grid-cols-2 lg:items-center">
+      <div className="relative mx-auto grid max-w-7xl gap-10 px-4 lg:grid-cols-2 lg:items-center lg:gap-16 lg:px-5">
         <div>
           <Pill>Simple Process</Pill>
-          <h2 className="mt-6 text-5xl font-black leading-tight md:text-6xl" style={{ color: NAVY }}>
+          <h2 className="mt-4 text-2xl font-black leading-tight lg:mt-6 lg:text-5xl md:text-4xl" style={{ color: NAVY }}>
             Filing Taxes Shouldn't Feel Complicated.
           </h2>
-          <div className="mt-12 space-y-8">
+          <div className="mt-8 space-y-5 lg:mt-12 lg:space-y-8">
             {processSteps.map((step) => (
-              <div key={step.number} className="flex gap-6">
+              <div key={step.number} className="flex gap-4">
                 <div
-                  className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl text-2xl font-black text-white shadow-xl"
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-lg font-black text-white shadow-xl lg:h-16 lg:w-16 lg:rounded-2xl lg:text-2xl"
                   style={{ backgroundColor: NAVY }}
                 >
                   {step.number}
                 </div>
                 <div>
-                  <div className="text-2xl font-black" style={{ color: NAVY }}>
+                  <div className="text-base font-black lg:text-2xl" style={{ color: NAVY }}>
                     {step.title}
                   </div>
-                  <p className="mt-2 text-lg leading-8 text-slate-600">{step.text}</p>
+                  <p className="mt-1 text-sm leading-6 text-slate-600 lg:mt-2 lg:text-lg lg:leading-8">{step.text}</p>
                 </div>
               </div>
             ))}
           </div>
         </div>
-        <div className="rounded-[2.5rem] p-10 shadow-2xl" style={{ backgroundColor: NAVY }}>
-          <div className="rounded-[2rem] bg-white p-8">
-            <div className="mb-8 flex items-center justify-between gap-4">
+        <div className="rounded-2xl p-3 shadow-2xl lg:rounded-[2.5rem] lg:p-10" style={{ backgroundColor: NAVY }}>
+          <div className="rounded-2xl bg-white p-4 lg:rounded-[2rem] lg:p-8">
+            <div className="mb-5 flex items-center justify-between gap-3 lg:mb-8">
               <div>
-                <div className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400">
+                <div className="text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400 lg:text-sm lg:tracking-[0.2em]">
                   Start Your Filing
                 </div>
-                <h3 className="mt-2 text-4xl font-black" style={{ color: NAVY }}>
+                <h3 className="mt-1 text-xl font-black lg:mt-2 lg:text-4xl" style={{ color: NAVY }}>
                   Client Intake Portal
                 </h3>
               </div>
-              <Upload size={32} style={{ color: GOLD }} />
+              <Upload size={20} style={{ color: GOLD }} className="lg:size-8" />
             </div>
             {success ? (
-              <div className="flex flex-col items-center py-8 text-center">
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full" style={{ backgroundColor: PALE_GOLD }}>
-                  <CheckCircle2 size={32} style={{ color: GOLD }} />
+              <div className="flex flex-col items-center py-6 text-center lg:py-8">
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full lg:mb-4 lg:h-16 lg:w-16" style={{ backgroundColor: PALE_GOLD }}>
+                  <CheckCircle2 size={24} style={{ color: GOLD }} className="lg:size-8" />
                 </div>
-                <h4 className="text-2xl font-black" style={{ color: NAVY }}>Request Submitted!</h4>
-                <p className="mt-2 text-slate-500">We'll contact you within 24 hours to get started.</p>
+                <h4 className="text-xl font-black lg:text-2xl" style={{ color: NAVY }}>Request Submitted!</h4>
+                <p className="mt-1.5 text-sm text-slate-500 lg:mt-2">We'll contact you within 24 hours to get started.</p>
                 <button
                   type="button"
-                  className="mt-6 rounded-2xl px-6 py-3 font-bold text-white"
+                  className="mt-5 rounded-xl px-5 py-2.5 text-sm font-bold text-white lg:mt-6 lg:rounded-2xl lg:px-6 lg:py-3"
                   style={{ backgroundColor: NAVY }}
                   onClick={() => { setSuccess(false); setForm({ full_name: '', email: '', phone: '', tax_type: '', message: '' }); }}
                 >
@@ -875,12 +885,12 @@ function ProcessIntakeSection() {
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="grid gap-4">
+              <form onSubmit={handleSubmit} className="grid gap-3 lg:gap-4">
                 <input
                   type="text"
                   required
                   placeholder="Full Name *"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-4 text-slate-800 placeholder-slate-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100 lg:py-4 lg:text-base"
                   value={form.full_name}
                   onChange={(e) => setForm({ ...form, full_name: e.target.value })}
                 />
@@ -888,7 +898,7 @@ function ProcessIntakeSection() {
                   type="email"
                   required
                   placeholder="Email Address *"
-                  className="w-full rounded-xl border border-slate-200 px-4 py-4 text-slate-800 placeholder-slate-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100 lg:py-4 lg:text-base"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                 />
@@ -900,7 +910,7 @@ function ProcessIntakeSection() {
                   onChange={(e) => setForm({ ...form, phone: e.target.value })}
                 />
                 <select
-                  className="w-full rounded-xl border border-slate-200 px-4 py-4 text-slate-500 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-500 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100 lg:py-4 lg:text-base"
                   value={form.tax_type}
                   onChange={(e) => setForm({ ...form, tax_type: e.target.value })}
                 >
@@ -912,20 +922,20 @@ function ProcessIntakeSection() {
                 <textarea
                   placeholder="Anything else we should know?"
                   rows={3}
-                  className="w-full resize-none rounded-xl border border-slate-200 px-4 py-4 text-slate-800 placeholder-slate-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100"
+                  className="w-full resize-none rounded-xl border border-slate-200 px-4 py-3 text-sm text-slate-800 placeholder-slate-400 focus:border-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-100 lg:py-4 lg:text-base"
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                 />
-                {error && <p className="text-sm text-red-500">{error}</p>}
+                {error && <p className="text-xs text-red-500 lg:text-sm">{error}</p>}
                 <button
                   type="submit"
                   disabled={loading}
-                  className="mt-2 rounded-2xl py-4 text-lg font-black text-white shadow-xl transition hover:opacity-90 disabled:opacity-60"
+                  className="mt-1 rounded-xl py-3 text-sm font-black text-white shadow-xl transition hover:opacity-90 disabled:opacity-60 lg:mt-2 lg:rounded-2xl lg:py-4 lg:text-lg"
                   style={{ backgroundColor: GOLD }}
                 >
                   {loading ? 'Submitting...' : 'Submit Secure Request'}
                 </button>
-                <p className="text-center text-xs text-slate-400">Your info is encrypted and never shared.</p>
+                <p className="text-center text-[10px] text-slate-400 lg:text-xs">Your info is encrypted and never shared.</p>
               </form>
             )}
           </div>
@@ -943,15 +953,15 @@ function FinalCta({ onAdminClick }: { onAdminClick: () => void }) {
           className="rounded-[3rem] p-12 text-center text-white shadow-2xl"
           style={{ backgroundColor: NAVY }}
         >
-          <h2 className="text-5xl font-black">Ready To Get Started?</h2>
-          <p className="mx-auto mt-5 max-w-3xl text-lg leading-8 text-slate-200">
+          <h2 className="text-3xl font-black lg:text-5xl">Ready To Get Started?</h2>
+          <p className="mx-auto mt-4 max-w-3xl text-sm leading-6 text-slate-200 lg:mt-5 lg:text-lg lg:leading-8">
             Work with Apex Tax Business Group for a clean, secure, and professional tax filing experience.
           </p>
-          <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
+          <div className="mt-7 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-center sm:gap-4 lg:mt-10">
             <button
               type="button"
               onClick={() => document.getElementById('upload')?.scrollIntoView({ behavior: 'smooth' })}
-              className="rounded-2xl px-8 py-4 text-center font-black text-slate-950 shadow-lg transition hover:opacity-90"
+              className="rounded-xl px-6 py-3.5 text-center text-sm font-black text-slate-950 shadow-lg transition hover:opacity-90 sm:text-base lg:rounded-2xl lg:px-8 lg:py-4"
               style={{ backgroundColor: GOLD }}
             >
               Start Filing
@@ -959,7 +969,7 @@ function FinalCta({ onAdminClick }: { onAdminClick: () => void }) {
             <button
               type="button"
               onClick={onAdminClick}
-              className="rounded-2xl border border-white px-8 py-4 text-center font-black text-white transition hover:bg-white/10"
+              className="rounded-xl border border-white px-6 py-3.5 text-center text-sm font-black text-white transition hover:bg-white/10 sm:text-base lg:rounded-2xl lg:px-8 lg:py-4"
             >
               Admin Login
             </button>
