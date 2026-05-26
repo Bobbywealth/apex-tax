@@ -248,27 +248,29 @@ function Header({
 
   return (
     <header className="sticky top-0 z-20 border-b bg-white/95 backdrop-blur">
-      {/* Mobile: logo centered, hamburger right */}
-      <div className="flex items-center justify-between px-4 py-4 md:hidden">
-        {/* Left spacer to balance centered logo */}
-        <div className="w-8" />
-
-        {/* Centered logo */}
-        <a href="#home" className="flex flex-col items-center gap-1">
+      {/* Mobile: logo left, hamburger right */}
+      <div className="flex items-center justify-between px-4 py-3 md:hidden">
+        {/* Logo left-aligned with brand name */}
+        <a href="#home" className="flex items-center gap-2">
           <div
-            className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl bg-white p-1.5 shadow-lg ring-1 ring-slate-200"
+            className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white p-2 shadow-lg ring-1 ring-slate-200"
           >
             <img src={LOGO_URL} alt="Apex Tax logo" className="h-full w-full object-contain" />
           </div>
-          <div className="text-[1.1rem] font-black tracking-tight leading-none" style={{ color: NAVY }}>
-            APEX TAX
+          <div>
+            <div className="text-[1.5rem] font-black tracking-tight leading-none" style={{ color: NAVY }}>
+              APEX TAX
+            </div>
+            <div className="text-[0.55rem] font-semibold tracking-[0.25em]" style={{ color: GOLD }}>
+              BUSINESS GROUP
+            </div>
           </div>
         </a>
 
         {/* Hamburger button */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
-          className="flex h-8 w-8 flex-col items-center justify-center gap-1.5 rounded-lg bg-slate-100 p-1"
+          className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 rounded-xl bg-slate-100 p-2"
           aria-label="Toggle menu"
         >
           <span className={`block h-0.5 w-5 bg-slate-600 transition-all ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
