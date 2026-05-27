@@ -47,7 +47,7 @@ export default function Contact() {
             >
               <img
                 src="https://i.imgur.com/0uQZnHh.png"
-                alt="Apex Tax logo"
+                alt="Apex Business Group logo"
                 className="h-full w-full object-contain"
               />
             </div>
@@ -143,7 +143,7 @@ export default function Contact() {
 
             <div className="rounded-3xl bg-white p-8 shadow-sm">
               <h3 className="text-lg font-black" style={{ color: "#132D52" }}>
-                Why Choose Apex Tax?
+                Why Choose Apex Business Group?
               </h3>
               <ul className="mt-4 space-y-3">
                 {[

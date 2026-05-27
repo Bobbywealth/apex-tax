@@ -13,7 +13,7 @@ export default function PrivacyPolicy() {
             >
               <img
                 src="https://i.imgur.com/0uQZnHh.png"
-                alt="Apex Tax logo"
+                alt="Apex Business Group logo"
                 className="h-full w-full object-contain"
               />
             </div>
@@ -46,7 +46,7 @@ export default function PrivacyPolicy() {
           <div className="prose prose-slate max-w-none space-y-6 text-slate-600">
 
             <p>
-              Apex Tax Business Group ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our services.
+              Apex Business Group ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our services.
             </p>
 
             <h2 className="text-2xl font-bold" style={{ color: "#132D52" }}>Information We Collect</h2>
@@ -97,7 +97,7 @@ export default function PrivacyPolicy() {
               If you have questions about this Privacy Policy, please contact us at:
             </p>
             <div className="rounded-2xl border border-slate-100 bg-slate-50 p-5">
-              <p className="font-semibold" style={{ color: "#132D52" }}>Apex Tax Business Group</p>
+              <p className="font-semibold" style={{ color: "#132D52" }}>Apex Business Group</p>
               <p className="mt-2">Email: <a href="mailto:privacy@apextaxbg.com" className="text-blue-600 hover:underline">privacy@apextaxbg.com</a></p>
               <p>Phone: <a href="tel:+19735550142" className="text-blue-600 hover:underline">(973) 555-0142</a></p>
             </div>

@@ -302,7 +302,7 @@ function Header({
           <div
             className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white p-2 shadow-lg ring-1 ring-slate-200"
           >
-            <img src={LOGO_URL} alt="Apex Tax logo" className="h-full w-full object-contain" />
+            <img src={LOGO_URL} alt="Apex Business Group logo" className="h-full w-full object-contain" />
           </div>
           <div>
             <div className="text-[1.5rem] font-black tracking-tight leading-none" style={{ color: NAVY }}>
@@ -351,7 +351,7 @@ function Header({
           <div
             className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white p-2 shadow-lg ring-1 ring-slate-200"
           >
-            <img src={LOGO_URL} alt="Apex Tax logo" className="h-full w-full object-contain" />
+            <img src={LOGO_URL} alt="Apex Business Group logo" className="h-full w-full object-contain" />
           </div>
           <div>
             <div className="text-[1.8rem] font-black tracking-tight leading-none" style={{ color: NAVY }}>
@@ -525,7 +525,7 @@ function HeroSection() {
               <div className="absolute inset-0 z-10 bg-gradient-to-r from-[#06162B]/65 via-transparent to-transparent" />
               <img
                 src={HERO_IMAGE_URL}
-                alt="Luxury Apex Tax dashboard preview"
+                alt="Luxury Apex Business Group dashboard preview"
                 className="min-h-[720px] w-full object-cover object-center"
               />
 
@@ -554,7 +554,7 @@ function FeaturedImageSection() {
             <div className="relative min-h-[420px] overflow-hidden bg-[#081A33]">
               <img
                 src={LOGO_URL}
-                alt="Apex Tax Lion"
+                alt="Apex Business Group Lion"
                 className="absolute inset-0 h-full w-full object-cover opacity-10"
               />
               <div className="absolute inset-0 bg-gradient-to-br from-[#081A33] via-[#132D52]/90 to-[#132D52]" />
@@ -718,7 +718,7 @@ function TestimonialsSection() {
             Trusted By Individuals, Families & Self-Employed Filers.
           </h2>
           <p className="mx-auto mt-4 max-w-3xl text-base leading-relaxed text-slate-300 sm:mt-6 sm:text-lg">
-            Apex Tax Business Group delivers a premium tax filing experience with simple uploads, clear updates, and organized client communication.
+            Apex Business Group delivers a premium tax filing experience with simple uploads, clear updates, and organized client communication.
           </p>
         </div>
         <div className="grid gap-8 lg:grid-cols-3">
@@ -821,7 +821,7 @@ function Footer({ setView }: { setView: (v: "website" | "dashboard") => void }) 
           {/* Logo + tagline */}
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white p-1 shadow ring-1 ring-slate-200">
-              <img src={LOGO_URL} alt="Apex Tax" className="h-full w-full object-contain" />
+              <img src={LOGO_URL} alt="Apex Business Group" className="h-full w-full object-contain" />
             </div>
             <div>
               <div className="text-sm font-black" style={{ color: NAVY }}>APEX TAX</div>
@@ -839,7 +839,7 @@ function Footer({ setView }: { setView: (v: "website" | "dashboard") => void }) 
           </nav>
 
           {/* Copyright */}
-          <p className="text-xs text-slate-400">© {new Date().getFullYear()} Apex Tax Business Group</p>
+          <p className="text-xs text-slate-400">© {new Date().getFullYear()} Apex Business Group</p>
         </div>
       </div>
     </footer>
@@ -856,7 +856,7 @@ function FinalCta({ onAdminClick }: { onAdminClick: () => void }) {
         >
           <h2 className="text-3xl font-black sm:text-4xl lg:text-5xl">Ready To Get Started?</h2>
           <p className="mx-auto mt-4 max-w-3xl text-base leading-relaxed text-slate-200 sm:mt-5 sm:text-lg lg:text-xl">
-            Work with Apex Tax Business Group for a clean, secure, and professional tax filing experience.
+            Work with Apex Business Group for a clean, secure, and professional tax filing experience.
           </p>
           <div className="mt-10 flex flex-col gap-3 sm:flex-row sm:justify-center sm:gap-4">
             <button
@@ -907,7 +907,7 @@ function AdminLogin({ onLogin }: { onLogin: (token: string) => void }) {
       <div className="w-full max-w-md rounded-3xl p-8 shadow-xl" style={{ backgroundColor: "white" }}>
         <div className="mb-8 flex flex-col items-center text-center">
           <div className="mb-4 flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white p-2 shadow-lg ring-1 ring-slate-200">
-            <img src={LOGO_URL} alt="Apex Tax" className="h-full w-full object-contain" />
+            <img src={LOGO_URL} alt="Apex Business Group" className="h-full w-full object-contain" />
           </div>
           <h1 className="text-2xl font-black" style={{ color: NAVY }}>Admin Portal</h1>
           <p className="mt-1 text-sm text-slate-500">Sign in to manage clients and intake</p>
@@ -1149,7 +1149,7 @@ function AdminDashboard({ onLogout }: { onLogout: () => void }) {
         {/* Desktop logo + label */}
         <div className="hidden md:flex mb-6 items-center gap-3 text-lg font-black">
           <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white p-1">
-            <img src={LOGO_URL} alt="Apex Tax" className="h-full w-full object-contain" />
+            <img src={LOGO_URL} alt="Apex Business Group" className="h-full w-full object-contain" />
           </div>
           <span>Admin Portal</span>
         </div>
