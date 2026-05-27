@@ -306,10 +306,7 @@ function Header({
           </div>
           <div>
             <div className="text-[1.5rem] font-black tracking-tight leading-none" style={{ color: NAVY }}>
-              APEX TAX
-            </div>
-            <div className="text-[0.55rem] font-semibold tracking-[0.25em]" style={{ color: GOLD }}>
-              BUSINESS GROUP
+              APEX BUSINESS GROUP
             </div>
           </div>
         </a>
@@ -355,10 +352,7 @@ function Header({
           </div>
           <div>
             <div className="text-[1.8rem] font-black tracking-tight leading-none" style={{ color: NAVY }}>
-              APEX TAX
-            </div>
-            <div className="mt-1 text-[0.65rem] font-semibold tracking-[0.38em]" style={{ color: GOLD }}>
-              BUSINESS GROUP
+              APEX BUSINESS GROUP
             </div>
           </div>
         </a>
