@@ -824,8 +824,8 @@ function Footer({ setView }: { setView: (v: "website" | "dashboard") => void }) 
               <img src={LOGO_URL} alt="Apex Business Group" className="h-full w-full object-contain" />
             </div>
             <div>
-              <div className="text-sm font-black" style={{ color: NAVY }}>APEX TAX</div>
-              <div className="text-[0.6rem] font-semibold tracking-widest text-slate-400">BUSINESS GROUP</div>
+              <div className="text-sm font-black" style={{ color: NAVY }}>APEX</div>
+              <div className="text-[0.6rem] font-semibold tracking-widest" style={{ color: GOLD }}>BUSINESS GROUP</div>
             </div>
           </div>
 
