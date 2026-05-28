@@ -542,7 +542,7 @@ function HeroSection() {
 
 function FeaturedImageSection() {
   return (
-    <section className="relative -mt-24 pb-10">
+    <section className="relative pb-10 md:-mt-24">
       <div className="mx-auto max-w-7xl px-5">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
