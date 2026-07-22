@@ -835,7 +835,7 @@ function Footer({ setView }: { setView: (v: "website" | "dashboard") => void }) 
             <span className="text-slate-300">|</span>
             <a href="#contact" className="hover:text-slate-800">Contact Us</a>
             <span className="text-slate-300">|</span>
-            <a href="#privacy" target="_blank" rel="noopener" className="hover:text-slate-800">Privacy Policy</a>
+            <a href="#privacy" target="_blank" rel="noopener" className="hover:text-slate-800 inline-flex items-center px-2 -mx-2 py-3 min-h-[44px]">Privacy Policy</a>
           </nav>
 
           {/* Copyright */}
