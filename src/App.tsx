@@ -693,7 +693,7 @@ function ServicesSection() {
                   {service.title}
                 </h3>
                 <p className="mt-3 leading-6 text-slate-600 sm:mt-4 sm:leading-7">{service.text}</p>
-                <button type="button" className="mt-4 text-sm font-bold sm:mt-6" style={{ color: GOLD }}>
+                <button type="button" className="mt-4 inline-flex items-center text-sm font-bold sm:mt-6 px-2 -mx-2 py-3 min-h-[44px]" style={{ color: GOLD }}>
                   Learn More →
                 </button>
               </motion.div>
@@ -831,7 +831,7 @@ function Footer({ setView }: { setView: (v: "website" | "dashboard") => void }) 
 
           {/* Links */}
           <nav className="flex flex-wrap justify-center gap-6 text-sm font-semibold text-slate-500">
-            <button onClick={() => { setView("website"); window.location.hash = "#home"; }} className="hover:text-slate-800">Front End</button>
+            <button onClick={() => { setView("website"); window.location.hash = "#home"; }} className="hover:text-slate-800 inline-flex items-center px-2 -mx-2 py-3 min-h-[44px]">Front End</button>
             <span className="text-slate-300">|</span>
             <a href="#contact" className="hover:text-slate-800">Contact Us</a>
             <span className="text-slate-300">|</span>
